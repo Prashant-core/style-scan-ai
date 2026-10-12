@@ -1,69 +1,126 @@
-import Image from "next/image";
+'use client';
+import { useState } from 'react';
+import { UploadCloud, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'; // Make sure to run: npm install lucide-react
 
-export default function Home() {
+export default function StylingStudio() {
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const uploadedFile = e.dataTransfer.files[0];
+    if (uploadedFile) processFile(uploadedFile);
+  };
+
+  const processFile = (uploadedFile) => {
+    setFile(uploadedFile);
+    setPreview(URL.createObjectURL(uploadedFile));
+  };
+
+  const runAnalysis = async () => {
+    if (!file) return;
+    setLoading(true);
+    
+    // Simulate backend delay for now until we reconnect the API
+    setTimeout(() => {
+      setResults({
+        status: "success",
+        face_shape: "Strong Jawline / Square",
+        landmarks_detected: 468,
+        recommendation: "Angular frames and textured top hairstyles recommended."
+      });
+      setLoading(false);
+    }, 2000);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
+    <div className="min-h-screen bg-[#0a0a0a] text-gray-200 font-sans p-8">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header */}
+        <header className="mb-12 border-b border-gray-800 pb-6 flex items-center gap-3">
+          <Sparkles className="text-emerald-500 w-8 h-8" />
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            LookLogic AI <span className="text-gray-500 font-light">| Virtual Studio</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
+          {/* Upload Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-gray-100">Upload Portrait</h2>
+            <div 
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+              className="border-2 border-dashed border-gray-700 hover:border-emerald-500 transition-colors bg-gray-900/50 rounded-xl p-12 text-center cursor-pointer flex flex-col items-center justify-center min-h-[300px]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              {preview ? (
+                <img src={preview} alt="Preview" className="h-64 object-cover rounded-lg shadow-2xl" />
+              ) : (
+                <>
+                  <UploadCloud className="w-12 h-12 text-gray-500 mb-4" />
+                  <p className="text-gray-400 mb-2">Drag and drop your headshot here</p>
+                  <label className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md cursor-pointer transition text-sm">
+                    Browse Files
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => processFile(e.target.files[0])} />
+                  </label>
+                </>
+              )}
+            </div>
+
+            <button 
+              onClick={runAnalysis}
+              disabled={!file || loading}
+              className={`w-full py-4 rounded-lg font-medium transition-all ${
+                !file ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
+              }`}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {loading ? 'Analyzing Facial Geometry...' : 'Run AI Analysis'}
+            </button>
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-gray-100">Styling Metrics</h2>
+            
+            {results ? (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <CheckCircle className="text-emerald-500 w-6 h-6" />
+                  <h3 className="text-2xl font-bold text-white">Analysis Complete</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between border-b border-gray-800 pb-3">
+                    <span className="text-gray-400">Face Shape</span>
+                    <span className="font-medium text-white">{results.face_shape}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-800 pb-3">
+                    <span className="text-gray-400">Landmarks Mapped</span>
+                    <span className="font-medium text-emerald-400">{results.landmarks_detected} points</span>
+                  </div>
+                  <div className="pt-4">
+                    <span className="text-gray-400 text-sm block mb-2">AI Styling Recommendation</span>
+                    <p className="text-gray-200 bg-gray-800 p-4 rounded-lg text-sm leading-relaxed">
+                      {results.recommendation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="h-[400px] flex items-center justify-center border border-gray-800 rounded-xl bg-gray-900/20">
+                <div className="text-center">
+                  <AlertCircle className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-500">Awaiting image upload...</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
-}
+}90   

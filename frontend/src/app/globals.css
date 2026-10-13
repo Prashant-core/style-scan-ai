@@ -1,9 +1,74 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-body {
-  background-color: #f9fafb;
-  color: #111827;
+/* Colors: paper and white for surfaces, ink for text and buttons,
+   tape yellow only for measurements and highlights. */
+@theme {
+  --color-paper: #f3f4f1;
+  --color-surface: #ffffff;
+  --color-ink: #0f1a2a;
+  --color-ink-soft: #1b2a3f;
+  --color-muted: #566170;
+  --color-line: #d9dee3;
+  --color-tape: #f2c230;
+  --color-tape-soft: #fbf1cc;
+  --color-danger: #b3261e;
+  --color-danger-soft: #fceae9;
+  --color-success: #1b7f4b;
+}
+
+/* Fonts are loaded in layout.js */
+@theme inline {
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background: var(--color-tape);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* A ruler strip: small marks every 10px, taller marks every 50px */
+  .ruler {
+    height: 14px;
+    background-image:
+      linear-gradient(to right, var(--color-ink) 1px, transparent 1px),
+      linear-gradient(to right, var(--color-ink) 1px, transparent 1px);
+    background-size:
+      10px 6px,
+      50px 14px;
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

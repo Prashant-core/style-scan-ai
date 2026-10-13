@@ -1,126 +1,210 @@
-'use client';
-import { useState } from 'react';
-import { UploadCloud, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'; // Make sure to run: npm install lucide-react
+import Link from "next/link";
+import Navbar from "@/components/ui/Navbar";
+import Logo from "@/components/ui/Logo";
+import Button from "@/components/ui/Button";
+import Reveal from "@/components/ui/Reveal";
+import FaceDiagram from "@/components/ui/FaceDiagram";
 
-export default function StylingStudio() {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+export const metadata = {
+  title: "StyleScan AI | Find the haircut and glasses that fit your face",
+};
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const uploadedFile = e.dataTransfer.files[0];
-    if (uploadedFile) processFile(uploadedFile);
-  };
+const WHAT_IT_DOES = [
+  {
+    name: "Face analysis",
+    text: "We measure your forehead, cheekbones, jaw and face length to find your face shape. Then you get haircut, beard and glasses ideas that suit it.",
+  },
+  {
+    name: "Trial room",
+    text: "Type what you want to try, like “leather jacket” or “short beard”. We redraw your selfie so you can see it before you buy.",
+  },
+  {
+    name: "Placement photo",
+    text: "Turn an everyday selfie into a clean, formal photo for your resume or LinkedIn. We also check if your hair and beard look neat for an interview.",
+  },
+  {
+    name: "Skin tracker",
+    text: "Scan your skin once a day. A simple graph shows if your routine is working.",
+  },
+  {
+    name: "Style assistant",
+    text: "Ask a question in plain words. The answer uses your own results, not general tips.",
+  },
+  {
+    name: "Daily tip",
+    text: "One short idea each day, based on your latest scan.",
+  },
+];
 
-  const processFile = (uploadedFile) => {
-    setFile(uploadedFile);
-    setPreview(URL.createObjectURL(uploadedFile));
-  };
+const STEPS = [
+  {
+    title: "Upload a selfie",
+    text: "Use a clear photo of your face in good light. It takes a few seconds.",
+  },
+  {
+    title: "Read your results",
+    text: "See your face shape, your measurements and the styles that fit.",
+  },
+  {
+    title: "Try, track and improve",
+    text: "Try new looks in the trial room and check your skin progress over time.",
+  },
+];
 
-  const runAnalysis = async () => {
-    if (!file) return;
-    setLoading(true);
-    
-    // Simulate backend delay for now until we reconnect the API
-    setTimeout(() => {
-      setResults({
-        status: "success",
-        face_shape: "Strong Jawline / Square",
-        landmarks_detected: 468,
-        recommendation: "Angular frames and textured top hairstyles recommended."
-      });
-      setLoading(false);
-    }, 2000);
-  };
+const PRIVACY = [
+  {
+    title: "Only you can see them",
+    text: "Your photos and results are private to your account.",
+  },
+  {
+    title: "Delete them any time",
+    text: "Remove your photos or your whole account whenever you want.",
+  },
+  {
+    title: "Passwords stay secret",
+    text: "We save a scrambled version of your password, never the password itself.",
+  },
+];
 
+export default function IntroPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-200 font-sans p-8">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Header */}
-        <header className="mb-12 border-b border-gray-800 pb-6 flex items-center gap-3">
-          <Sparkles className="text-emerald-500 w-8 h-8" />
-          <h1 className="text-3xl font-bold tracking-tight text-white">
-            LookLogic AI <span className="text-gray-500 font-light">| Virtual Studio</span>
-          </h1>
-        </header>
+    <>
+      <Navbar />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          
-          {/* Upload Section */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-100">Upload Portrait</h2>
-            <div 
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              className="border-2 border-dashed border-gray-700 hover:border-emerald-500 transition-colors bg-gray-900/50 rounded-xl p-12 text-center cursor-pointer flex flex-col items-center justify-center min-h-[300px]"
-            >
-              {preview ? (
-                <img src={preview} alt="Preview" className="h-64 object-cover rounded-lg shadow-2xl" />
-              ) : (
-                <>
-                  <UploadCloud className="w-12 h-12 text-gray-500 mb-4" />
-                  <p className="text-gray-400 mb-2">Drag and drop your headshot here</p>
-                  <label className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md cursor-pointer transition text-sm">
-                    Browse Files
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => processFile(e.target.files[0])} />
-                  </label>
-                </>
-              )}
+      <main>
+        {/* Hero */}
+        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8 lg:pb-28 lg:pt-20">
+          <div>
+            <Reveal onLoad>
+              <h1 className="font-display text-[3.5rem] font-semibold leading-[0.92] tracking-tight sm:text-7xl lg:text-[5.75rem]">
+                Find the haircut and glasses that fit your face.
+              </h1>
+            </Reveal>
+            <Reveal onLoad delay={0.1}>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
+                Upload one selfie. StyleScan AI measures your face, finds your face shape and shows
+                you the styles that suit it. It also helps you get ready for job interviews.
+              </p>
+            </Reveal>
+            <Reveal onLoad delay={0.2} className="mt-9 flex flex-wrap gap-3">
+              <Button href="/signup" size="lg">
+                Create account
+              </Button>
+              <Button href="/#how-it-works" variant="secondary" size="lg">
+                See how it works
+              </Button>
+            </Reveal>
+            <Reveal onLoad delay={0.3}>
+              <p className="mt-5 text-sm text-muted">Free to use. Your photos stay private.</p>
+            </Reveal>
+          </div>
+
+          <div className="rounded-2xl bg-ink p-5 sm:p-8">
+            <FaceDiagram className="w-full" />
+            <Reveal onLoad delay={3.4} className="mt-6 border-t border-white/15 pt-5 text-white">
+              <p className="text-sm text-white/60">Example result</p>
+              <p className="mt-1 font-display text-3xl font-semibold">Oval face</p>
+              <p className="mt-2 max-w-md text-white/75">
+                Your jaw is narrower than your cheekbones. Most haircuts and frame styles suit this
+                shape.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* What it does */}
+        <section id="what-it-does" className="mx-auto max-w-6xl scroll-mt-16 px-5 pb-20 lg:px-8 lg:pb-28">
+          <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
+            What you can do
+          </h2>
+
+          <ul className="mt-12 border-t border-ink">
+            {WHAT_IT_DOES.map((item) => (
+              <li
+                key={item.name}
+                className="grid gap-2 border-b border-line py-7 transition-colors hover:bg-surface md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-12 md:px-4"
+              >
+                <h3 className="font-display text-3xl font-semibold tracking-tight">{item.name}</h3>
+                <p className="max-w-xl text-[17px] leading-relaxed text-muted">{item.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* How it works */}
+        <section id="how-it-works" className="scroll-mt-16 border-y border-line bg-surface py-20 lg:py-28">
+          <div className="mx-auto max-w-6xl px-5 lg:px-8">
+            <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
+              How it works
+            </h2>
+
+            <div className="ruler mt-12" aria-hidden="true" />
+
+            <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-8">
+              {STEPS.map((step, index) => (
+                <li key={step.title}>
+                  <Reveal delay={index * 0.1}>
+                    <span className="inline-block border-b-4 border-tape pb-1 font-display text-6xl font-semibold leading-none">
+                      {index + 1}
+                    </span>
+                    <h3 className="mt-5 font-display text-3xl font-semibold tracking-tight">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 max-w-xs text-[17px] leading-relaxed text-muted">{step.text}</p>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Privacy */}
+        <section id="privacy" className="mx-auto max-w-6xl scroll-mt-16 px-5 py-20 lg:px-8 lg:py-28">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+            <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
+              Your photos stay yours.
+            </h2>
+            <dl className="border-t border-ink">
+              {PRIVACY.map((item) => (
+                <div key={item.title} className="border-b border-line py-6 md:grid md:grid-cols-[1fr_1.4fr] md:gap-8">
+                  <dt className="font-display text-2xl font-semibold tracking-tight">{item.title}</dt>
+                  <dd className="mt-1 text-[17px] leading-relaxed text-muted md:mt-0">{item.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* Final call to action and footer */}
+        <section className="bg-ink text-white">
+          <div className="mx-auto max-w-6xl px-5 py-20 lg:px-8 lg:py-28">
+            <h2 className="max-w-2xl font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
+              See what fits before you spend money.
+            </h2>
+            <p className="mt-5 max-w-lg text-lg text-white/70">
+              Create a free account and upload your first selfie.
+            </p>
+            <Button href="/signup" variant="light" size="lg" className="mt-9">
+              Create account
+            </Button>
+          </div>
+
+          <footer className="border-t border-white/15">
+            <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-8 text-sm text-white/60 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+              <Logo tone="light" />
+              <div className="flex items-center gap-6">
+                <Link href="/login" className="transition-colors hover:text-white">
+                  Log in
+                </Link>
+                <Link href="/signup" className="transition-colors hover:text-white">
+                  Create account
+                </Link>
+              </div>
+              <p>© {new Date().getFullYear()} StyleScan AI</p>
             </div>
-
-            <button 
-              onClick={runAnalysis}
-              disabled={!file || loading}
-              className={`w-full py-4 rounded-lg font-medium transition-all ${
-                !file ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
-              }`}
-            >
-              {loading ? 'Analyzing Facial Geometry...' : 'Run AI Analysis'}
-            </button>
-          </div>
-
-          {/* Results Section */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-100">Styling Metrics</h2>
-            
-            {results ? (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <CheckCircle className="text-emerald-500 w-6 h-6" />
-                  <h3 className="text-2xl font-bold text-white">Analysis Complete</h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between border-b border-gray-800 pb-3">
-                    <span className="text-gray-400">Face Shape</span>
-                    <span className="font-medium text-white">{results.face_shape}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-800 pb-3">
-                    <span className="text-gray-400">Landmarks Mapped</span>
-                    <span className="font-medium text-emerald-400">{results.landmarks_detected} points</span>
-                  </div>
-                  <div className="pt-4">
-                    <span className="text-gray-400 text-sm block mb-2">AI Styling Recommendation</span>
-                    <p className="text-gray-200 bg-gray-800 p-4 rounded-lg text-sm leading-relaxed">
-                      {results.recommendation}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center border border-gray-800 rounded-xl bg-gray-900/20">
-                <div className="text-center">
-                  <AlertCircle className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500">Awaiting image upload...</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </footer>
+        </section>
+      </main>
+    </>
   );
-}90   
+}

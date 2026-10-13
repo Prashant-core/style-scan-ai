@@ -1,20 +1,26 @@
+import uuid
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, JSON
-from app.database import Base
+
+from sqlalchemy import JSON, DateTime, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base, utcnow
+
 
 class ScanHistory(Base):
+    """One row for every analysis or generated image a user creates."""
+
     __tablename__ = "scan_history"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, index=True, nullable=True)
-    image_url = Column(String, nullable=True)
-    face_shape = Column(String, nullable=False)
-    confidence_score = Column(Float, default=0.0)
-    
-    # Store calculated metric ratios (jaw-to-cheek, length-to-width)
-    proportions = Column(JSON, nullable=True)
-    
-    # Recommended styling rules (glasses, haircut, beard, necklines)
-    recommendations = Column(JSON, nullable=False)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    # face_analysis, skin_scan, trial_room or placement_photo
+    scan_type: Mapped[str] = mapped_column(String(30), index=True)
+    image_public_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped["User"] = relationship(back_populates="scans")

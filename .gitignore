@@ -15,6 +15,10 @@ node_modules/
 .next/
 out/
 
+# Deploy / logs
+.vercel/
+*.log
+
 # OS / editor
 .DS_Store
 .vscode/

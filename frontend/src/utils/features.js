@@ -20,7 +20,7 @@ export const FEATURES = [
     label: "Face analysis",
     summary: "Find your face shape and get haircut, beard and glasses ideas that fit it.",
     icon: ScanFace,
-    status: "soon",
+    status: "live",
   },
   {
     href: "/trial-room",

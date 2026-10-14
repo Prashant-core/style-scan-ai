@@ -10,7 +10,7 @@ from app import models  # noqa: F401  (loads the tables so they get created)
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.database import Base, engine
-from app.routers import auth, users
+from app.routers import analysis, auth, users
 
 
 @asynccontextmanager
@@ -57,6 +57,7 @@ async def add_security_headers(request: Request, call_next):
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(analysis.router)
 
 
 @app.get("/api/health", tags=["Health"])

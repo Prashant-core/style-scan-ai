@@ -7,7 +7,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import ScanHistory, User
 from app.schemas.scan import ScanCreate, ScanOut
-from app.services.recommendations import ADVICE, classify, get_advice
+from app.services.recommendations import ADVICE, classify, get_advice, match_scores
 
 router = APIRouter(prefix="/api/analysis", tags=["Face analysis"])
 
@@ -17,17 +17,23 @@ MAX_SAVED_SCANS = 200
 
 def to_out(scan: ScanHistory) -> dict:
     """Builds the response from a saved row. The advice text is added fresh each time."""
-    metrics = scan.metrics
-    shape = metrics["face_shape"]
-    runner_up = metrics.get("runner_up")
+    ratios = scan.metrics["ratios"]
+    # The shape is worked out again from the saved numbers, so improvements to the rules
+    # also apply to older results
+    shape, runner_up = classify(ratios["forehead"], ratios["jaw"], ratios["length"])
+    matches = [
+        {**item, "title": ADVICE[item["shape"]]["title"]}
+        for item in match_scores(ratios["forehead"], ratios["jaw"], ratios["length"])[:3]
+    ]
     return {
         "id": scan.id,
         "created_at": scan.created_at,
         "face_shape": shape,
         "runner_up": runner_up,
         "runner_up_title": ADVICE[runner_up]["title"] if runner_up else None,
-        "ratios": metrics["ratios"],
+        "ratios": ratios,
         "advice": get_advice(shape),
+        "matches": matches,
     }
 
 

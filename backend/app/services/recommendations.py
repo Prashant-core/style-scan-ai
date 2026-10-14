@@ -10,42 +10,70 @@ Every ratio is compared with the width of the cheekbones, so the cheekbones are 
     jaw      = jaw width       / cheekbone width
     length   = face length     / cheekbone width
 
-Each face shape has a typical set of ratios (SHAPE_PROFILES below).
-We pick the shape whose typical ratios are closest to the person's ratios.
-If the second shape is almost as close, we also report it as the "runner up".
+Why the numbers are "stretched" first
+-------------------------------------
+The face-point map used in the browser is a template that is fitted to each face, so real
+faces give very similar ratios (forehead about 0.84-0.90, jaw about 0.77-0.83). If we compared
+the raw ratios with fixed shapes, almost every face would look "average" (oval).
+So each ratio is first compared with the average face and stretched by its normal spread.
+After that, small real differences become clear. Each face shape is a spot in that stretched
+space (SHAPE_PROFILES below), and we pick the closest one.
 
-If results feel off for real faces, the numbers in SHAPE_PROFILES are the only thing to tune.
+If results feel off for real faces, the numbers below are the only thing to tune.
 """
 
-from math import sqrt
+from math import exp, sqrt
 
-# Typical ratios for each face shape: (length, forehead, jaw)
+# The average face measured on 9 real photos, and how much faces normally differ from it
+AVERAGE = {"length": 1.21, "forehead": 0.86, "jaw": 0.81}
+SPREAD = {"length": 0.07, "forehead": 0.025, "jaw": 0.025}
+
+# Each shape as (length, forehead, jaw) in stretched units. 0 = average, +1 = clearly above.
 SHAPE_PROFILES: dict[str, tuple[float, float, float]] = {
-    "oval": (1.20, 0.86, 0.80),
-    "round": (1.02, 0.90, 0.88),
-    "square": (1.06, 0.92, 0.95),
-    "heart": (1.18, 0.96, 0.70),
-    "diamond": (1.20, 0.76, 0.74),
-    "oblong": (1.40, 0.88, 0.84),
+    "oval": (0.0, 0.0, 0.0),
+    "round": (-1.6, 0.5, 0.8),
+    "square": (-0.8, 0.8, 1.8),
+    "heart": (0.0, 1.2, -1.5),
+    "diamond": (0.3, -1.5, -1.3),
+    "oblong": (1.8, 0.0, 0.0),
 }
 
 # If the second-closest shape is within this distance of the best one, report it too
-RUNNER_UP_GAP = 0.02
+RUNNER_UP_GAP = 0.3
+
+
+def _stretched(forehead: float, jaw: float, length: float) -> tuple[float, float, float]:
+    return (
+        (length - AVERAGE["length"]) / SPREAD["length"],
+        (forehead - AVERAGE["forehead"]) / SPREAD["forehead"],
+        (jaw - AVERAGE["jaw"]) / SPREAD["jaw"],
+    )
+
+
+def _distances(forehead: float, jaw: float, length: float) -> list[tuple[float, str]]:
+    z = _stretched(forehead, jaw, length)
+    return sorted(
+        (sqrt(sum((a - b) ** 2 for a, b in zip(z, profile))), name)
+        for name, profile in SHAPE_PROFILES.items()
+    )
 
 
 def classify(forehead: float, jaw: float, length: float) -> tuple[str, str | None]:
     """Returns (best shape, runner-up shape or None)."""
-    distances = sorted(
-        (
-            sqrt((length - l) ** 2 + (forehead - f) ** 2 + (jaw - j) ** 2),
-            name,
-        )
-        for name, (l, f, j) in SHAPE_PROFILES.items()
-    )
+    distances = _distances(forehead, jaw, length)
     best_distance, best = distances[0]
     second_distance, second = distances[1]
     runner_up = second if second_distance - best_distance < RUNNER_UP_GAP else None
     return best, runner_up
+
+
+def match_scores(forehead: float, jaw: float, length: float) -> list[dict]:
+    """How well the face fits each shape, as whole percentages that add up to 100."""
+    distances = _distances(forehead, jaw, length)
+    weights = [(name, exp(-(distance**2) / 2)) for distance, name in distances]
+    total = sum(w for _, w in weights) or 1.0
+    scores = [{"shape": name, "percent": round(100 * w / total)} for name, w in weights]
+    return scores
 
 
 def _item(name: str, why: str) -> dict[str, str]:

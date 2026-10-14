@@ -199,6 +199,25 @@ export default function FaceAnalysisPage() {
                   </p>
                 )}
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">{result.advice.summary}</p>
+                {result.matches?.length > 0 && (
+                  <div className="mt-6 max-w-xl">
+                    <p className="text-sm text-muted">How closely you match each shape</p>
+                    <ul className="mt-2 space-y-2">
+                      {result.matches.map((match) => (
+                        <li key={match.shape} className="flex items-center gap-3 text-sm">
+                          <span className="w-24 shrink-0 font-medium">{match.title.replace(" face", "")}</span>
+                          <span className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+                            <span
+                              className="block h-full rounded-full bg-tape"
+                              style={{ width: `${match.percent}%` }}
+                            />
+                          </span>
+                          <span className="w-10 text-right tabular-nums">{match.percent}%</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {warnings.length > 0 && (
                   <ul className="mt-5 max-w-xl space-y-1 rounded-lg border border-tape bg-tape/15 px-4 py-3 text-sm">
                     {warnings.map((warning) => (

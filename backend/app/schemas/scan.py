@@ -29,6 +29,12 @@ class StyleAdvice(BaseModel):
     avoid: list[str]
 
 
+class ShapeMatch(BaseModel):
+    shape: str
+    title: str
+    percent: int
+
+
 class ScanOut(BaseModel):
     id: str
     created_at: datetime
@@ -37,3 +43,4 @@ class ScanOut(BaseModel):
     ratios: FaceRatios
     advice: StyleAdvice
     runner_up_title: str | None = None
+    matches: list[ShapeMatch] = []

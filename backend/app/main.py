@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -10,7 +11,8 @@ from app import models  # noqa: F401  (loads the tables so they get created)
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.database import Base, engine
-from app.routers import analysis, auth, users
+from app.routers import analysis, assistant, auth, history, images, placement, skin, trial, users
+from app.services.gemini import AiError
 
 
 @asynccontextmanager
@@ -29,6 +31,12 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None if settings.is_production else "/openapi.json",
 )
+
+@app.exception_handler(AiError)
+async def ai_error_handler(request: Request, exc: AiError):
+    # AI problems become a short message the user can read
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -58,6 +66,12 @@ async def add_security_headers(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(analysis.router)
+app.include_router(skin.router)
+app.include_router(trial.router)
+app.include_router(placement.router)
+app.include_router(history.router)
+app.include_router(images.router)
+app.include_router(assistant.router)
 
 
 @app.get("/api/health", tags=["Health"])

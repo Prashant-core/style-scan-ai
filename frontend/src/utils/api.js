@@ -141,3 +141,22 @@ export const api = {
   patch: (path, body, options) => apiRequest(path, { method: "PATCH", body, ...options }),
   delete: (path, body, options) => apiRequest(path, { method: "DELETE", body, ...options }),
 };
+
+// Downloads a private photo. Photos need the login token, so they cannot be used as a plain image link.
+export async function fetchBlob(path, retry = true) {
+  const headers = {};
+  if (tokenStore.access) headers.Authorization = `Bearer ${tokenStore.access}`;
+
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { headers });
+  } catch {
+    throw new ApiError("Can't reach the server. Check your connection and try again.", 0);
+  }
+
+  if (response.status === 401 && retry && (await refreshTokens())) {
+    return fetchBlob(path, false);
+  }
+  if (!response.ok) throw new ApiError("We couldn't load this photo.", response.status);
+  return response.blob();
+}

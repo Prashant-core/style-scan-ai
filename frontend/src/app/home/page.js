@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
 import Card from "@/components/ui/Card";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/utils/api";
 import { FEATURES } from "@/utils/features";
 
 function getGreeting() {
@@ -60,6 +62,15 @@ function ToolRow({ item }) {
 export default function HomePage() {
   const { user } = useAuth();
   const firstName = user?.full_name?.split(" ")[0];
+  const [tip, setTip] = useState(null);
+
+  // The daily tip is a bonus. If it cannot load, the page works without it.
+  useEffect(() => {
+    api
+      .get("/api/tips/today")
+      .then((data) => setTip(data.tip))
+      .catch(() => setTip(null));
+  }, []);
 
   return (
     <>
@@ -75,7 +86,13 @@ export default function HomePage() {
             ))}
           </div>
 
-          <aside>
+          <aside className="space-y-6">
+            {tip && (
+              <Card className="bg-tape/25">
+                <h2 className="font-display text-2xl font-semibold tracking-tight">Tip of the day</h2>
+                <p className="mt-3 text-[15px] leading-relaxed">{tip}</p>
+              </Card>
+            )}
             <Card>
               <h2 className="font-display text-2xl font-semibold tracking-tight">Your account</h2>
               <dl className="mt-5 space-y-4 text-[15px]">

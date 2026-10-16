@@ -22,3 +22,6 @@ class User(Base):
     scans: Mapped[list["ScanHistory"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    images: Mapped[list["StoredImage"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )

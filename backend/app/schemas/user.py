@@ -80,3 +80,17 @@ class ProfileUpdate(BaseModel):
 
 class DeleteAccount(BaseModel):
     password: str = Field(min_length=1, max_length=128)
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=8, max_length=72)
+
+    @field_validator("new_password")
+    @classmethod
+    def check_new_password(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password is too long. Please use 72 characters or fewer.")
+        if not (re.search(r"[a-z]", value) and re.search(r"[A-Z]", value) and re.search(r"\d", value)):
+            raise ValueError("Password needs one capital letter, one small letter and one number.")
+        return value

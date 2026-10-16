@@ -27,32 +27,32 @@ export const FEATURES = [
     label: "Trial room",
     summary: "Type what you want to wear and see yourself in it before you buy.",
     icon: Shirt,
-    status: "soon",
+    status: "live",
   },
   {
     href: "/placement-studio",
     label: "Placement studio",
     summary: "Make a clean, formal photo for your resume and check your interview look.",
     icon: Briefcase,
-    status: "soon",
+    status: "live",
   },
   {
     href: "/skin-tracker",
     label: "Skin tracker",
     summary: "Scan your skin each day and see on a graph if your routine works.",
     icon: Activity,
-    status: "soon",
+    status: "live",
   },
   {
     href: "/assistant",
     label: "Style assistant",
     summary: "Ask a question and get an answer based on your own results.",
     icon: MessageCircle,
-    status: "soon",
+    status: "live",
   },
 ];
 
 export const ACCOUNT_ITEMS = [
-  { href: "/history", label: "History", icon: History, status: "soon" },
-  { href: "/settings", label: "Settings", icon: Settings, status: "soon" },
+  { href: "/history", label: "History", icon: History, status: "live" },
+  { href: "/settings", label: "Settings", icon: Settings, status: "live" },
 ];

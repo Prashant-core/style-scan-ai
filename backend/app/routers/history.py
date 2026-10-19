@@ -11,7 +11,10 @@ from app.services.recommendations import classify
 
 router = APIRouter(prefix="/api/history", tags=["History"])
 
-TYPES = {"face_analysis", "skin_scan", "trial_room", "placement_photo", "placement_check"}
+TYPES = {"face_analysis", "skin_scan", "trial_room"}
+
+# Older versions of the app saved these. They are hidden now, and deleted with "Delete my photos".
+OLD_TYPES = {"placement_photo", "placement_check"}
 
 
 @router.get("")
@@ -20,7 +23,9 @@ def list_history(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    query = select(ScanHistory).where(ScanHistory.user_id == current_user.id)
+    query = select(ScanHistory).where(
+        ScanHistory.user_id == current_user.id, ScanHistory.scan_type.notin_(OLD_TYPES)
+    )
     if scan_type:
         if scan_type not in TYPES:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Unknown history type.")

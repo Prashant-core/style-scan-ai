@@ -11,16 +11,16 @@ export const metadata = {
 
 const WHAT_IT_DOES = [
   {
+    name: "Photo editor",
+    text: "Crop, straighten, adjust light and colour, add filters and text, then save. It runs in your browser, so your photo stays on your device.",
+  },
+  {
     name: "Face analysis",
     text: "We measure your forehead, cheekbones, jaw and face length to find your face shape. Then you get haircut, beard and glasses ideas that suit it.",
   },
   {
     name: "Trial room",
     text: "Type what you want to try, like “leather jacket” or “short beard”. We redraw your selfie so you can see it before you buy.",
-  },
-  {
-    name: "Placement photo",
-    text: "Turn an everyday selfie into a clean, formal photo for your resume or LinkedIn. We also check if your hair and beard look neat for an interview.",
   },
   {
     name: "Skin tracker",
@@ -83,7 +83,7 @@ export default function IntroPage() {
             <Reveal onLoad delay={0.1}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
                 Upload one selfie. StyleScan AI measures your face, finds your face shape and shows
-                you the styles that suit it. It also helps you get ready for job interviews.
+                you the styles that suit it. A free photo editor helps you polish the picture too.
               </p>
             </Reveal>
             <Reveal onLoad delay={0.2} className="mt-9 flex flex-wrap gap-3">

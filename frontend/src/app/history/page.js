@@ -12,15 +12,10 @@ const FILTERS = [
   { id: "all", label: "All" },
   { id: "face_analysis", label: "Face analysis" },
   { id: "trial_room", label: "Trial room" },
-  { id: "placement_photo", label: "Resume photos" },
-  { id: "placement_check", label: "Interview checks" },
   { id: "skin_scan", label: "Skin scans" },
 ];
 
 const LABELS = Object.fromEntries(FILTERS.map((f) => [f.id, f.label]));
-
-const ATTIRE = { shirt: "formal shirt", blazer: "blazer", suit: "suit and tie", kurta: "formal kurta" };
-const BACKGROUND = { white: "white", grey: "light grey", blue: "light blue" };
 
 // One short line that says what the saved item is
 function describe(item) {
@@ -32,10 +27,6 @@ function describe(item) {
       return `Skin score ${m.overall} / 100`;
     case "trial_room":
       return m.prompt;
-    case "placement_photo":
-      return `${ATTIRE[m.attire] || "Formal"} on a ${BACKGROUND[m.background] || "plain"} background`;
-    case "placement_check":
-      return `Interview look ${m.overall} / 100`;
     default:
       return "";
   }
@@ -110,7 +101,7 @@ export default function HistoryPage() {
                   />
                 ) : (
                   <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-tape/25 text-center text-xs font-semibold">
-                    {item.scan_type === "face_analysis" ? "Face" : "Check"}
+                    {item.scan_type === "face_analysis" ? "Face" : "Scan"}
                   </div>
                 )}
 

@@ -11,7 +11,7 @@ from app import models  # noqa: F401  (loads the tables so they get created)
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.database import Base, engine
-from app.routers import analysis, assistant, auth, history, images, placement, skin, trial, users
+from app.routers import analysis, assistant, auth, history, images, skin, trial, users
 from app.services.gemini import AiError
 
 
@@ -68,7 +68,6 @@ app.include_router(users.router)
 app.include_router(analysis.router)
 app.include_router(skin.router)
 app.include_router(trial.router)
-app.include_router(placement.router)
 app.include_router(history.router)
 app.include_router(images.router)
 app.include_router(assistant.router)

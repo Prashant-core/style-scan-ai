@@ -32,7 +32,7 @@ def create_look(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    check_daily_limit(db, current_user, [SCAN_TYPE, "placement_photo"], settings.DAILY_IMAGE_LIMIT, "new pictures")
+    check_daily_limit(db, current_user, [SCAN_TYPE], settings.DAILY_IMAGE_LIMIT, "new pictures")
 
     request_text = " ".join(prompt.split())
     source = clean_photo(read_upload(photo), max_side=1024)

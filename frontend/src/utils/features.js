@@ -1,12 +1,12 @@
 import {
   Activity,
-  Briefcase,
   History,
   House,
   MessageCircle,
   ScanFace,
   Settings,
   Shirt,
+  SlidersHorizontal,
 } from "lucide-react";
 
 // status "live" opens the page. status "soon" shows a "Coming soon" tag.
@@ -15,6 +15,13 @@ import {
 export const HOME_ITEM = { href: "/home", label: "Home", icon: House };
 
 export const FEATURES = [
+  {
+    href: "/editor",
+    label: "Photo editor",
+    summary: "Crop, adjust, add filters and text, then save your photo.",
+    icon: SlidersHorizontal,
+    status: "live",
+  },
   {
     href: "/face-analysis",
     label: "Face analysis",
@@ -27,13 +34,6 @@ export const FEATURES = [
     label: "Trial room",
     summary: "Type what you want to wear and see yourself in it before you buy.",
     icon: Shirt,
-    status: "live",
-  },
-  {
-    href: "/placement-studio",
-    label: "Placement studio",
-    summary: "Make a clean, formal photo for your resume and check your interview look.",
-    icon: Briefcase,
     status: "live",
   },
   {

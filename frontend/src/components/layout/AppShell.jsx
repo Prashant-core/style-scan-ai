@@ -7,7 +7,8 @@ import Sidebar from "@/components/ui/Sidebar";
 import ProtectedRoute from "./ProtectedRoute";
 
 // The frame for every page after login: sidebar, mobile top bar and page heading.
-export default function AppShell({ title, description, children }) {
+// Pass wide for pages that need more room, like the photo editor.
+export default function AppShell({ title, description, wide = false, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -27,7 +28,7 @@ export default function AppShell({ title, description, children }) {
           </button>
         </header>
 
-        <main className="mx-auto w-full max-w-5xl px-5 py-10 lg:px-10 lg:py-14">
+        <main className={`mx-auto w-full px-5 py-10 lg:px-10 lg:py-14 ${wide ? "max-w-7xl" : "max-w-5xl"}`}>
           {title && (
             <div className="mb-10 max-w-2xl">
               <h1 className="font-display text-5xl font-semibold leading-none tracking-tight">

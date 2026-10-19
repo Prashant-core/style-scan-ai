@@ -65,7 +65,7 @@ def delete_my_photos(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Deletes every saved photo. Pictures made by the trial room and placement studio go with them.
+    """Deletes every saved photo. Pictures made by the trial room (and by older versions of the app) go with them.
     Skin scans and face results stay, without their photo."""
     db.execute(
         delete(ScanHistory).where(

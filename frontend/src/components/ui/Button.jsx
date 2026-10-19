@@ -44,7 +44,7 @@ export default function Button({
   const content = (
     <>
       {loading && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-      <span>{children}</span>
+      <span className="inline-flex items-center justify-center gap-2">{children}</span>
     </>
   );
 

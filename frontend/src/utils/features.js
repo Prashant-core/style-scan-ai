@@ -7,6 +7,7 @@ import {
   Settings,
   Shirt,
   SlidersHorizontal,
+  WandSparkles,
 } from "lucide-react";
 
 // status "live" opens the page. status "soon" shows a "Coming soon" tag.
@@ -20,6 +21,13 @@ export const FEATURES = [
     label: "Photo editor",
     summary: "Crop, adjust, add filters and text, then save your photo.",
     icon: SlidersHorizontal,
+    status: "live",
+  },
+  {
+    href: "/enhance",
+    label: "Photo enhancer",
+    summary: "Make a small, soft or noisy photo sharper with AI that runs in your browser.",
+    icon: WandSparkles,
     status: "live",
   },
   {

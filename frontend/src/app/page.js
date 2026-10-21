@@ -15,6 +15,10 @@ const WHAT_IT_DOES = [
     text: "Crop, straighten, adjust light and colour, add filters and text, then save. It runs in your browser, so your photo stays on your device.",
   },
   {
+    name: "Photo enhancer",
+    text: "Make a small, blurry or old photo sharper. The AI runs inside your browser, so nothing is uploaded.",
+  },
+  {
     name: "Face analysis",
     text: "We measure your forehead, cheekbones, jaw and face length to find your face shape. Then you get haircut, beard and glasses ideas that suit it.",
   },

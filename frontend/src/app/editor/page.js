@@ -29,6 +29,7 @@ import {
 } from "@/utils/editor";
 import { historyReducer, startHistory } from "@/utils/editorState";
 import { friendlyError } from "@/utils/photo";
+import { clearHandoff, peekHandoff } from "@/utils/handoff";
 
 const TABS = [
   { id: "adjust", label: "Adjust", icon: SlidersHorizontal },
@@ -97,6 +98,28 @@ export default function EditorPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Opens a photo sent from another page (for example the enhancer).
+  // It looks first and clears inside the promise, so it still works when React runs effects twice in development.
+  useEffect(() => {
+    const waiting = peekHandoff();
+    if (!waiting) return;
+    let active = true;
+    loadPhoto(waiting)
+      .then((opened) => {
+        if (!active) return;
+        clearHandoff();
+        setPhoto(opened);
+      })
+      .catch(() => {
+        if (!active) return;
+        clearHandoff();
+        setError("We couldn't open that photo. Please choose it again.");
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Warns before leaving the page with edits that were not saved

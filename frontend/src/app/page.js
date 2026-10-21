@@ -19,6 +19,10 @@ const WHAT_IT_DOES = [
     text: "Make a small, blurry or old photo sharper. The AI runs inside your browser, so nothing is uploaded.",
   },
   {
+    name: "Portrait tools",
+    text: "Blur the background, swap it for a colour or a picture, or remove it. Gently smooth skin and even out its tone. All in your browser.",
+  },
+  {
     name: "Face analysis",
     text: "We measure your forehead, cheekbones, jaw and face length to find your face shape. Then you get haircut, beard and glasses ideas that suit it.",
   },

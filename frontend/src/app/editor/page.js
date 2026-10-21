@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Crop, Download, Eye, Redo2, SlidersHorizontal, Sparkles, Type, Undo2 } from "lucide-react";
+import { Crop, Download, Eye, Redo2, SlidersHorizontal, Sparkles, Type, Undo2, Wand2 } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
@@ -30,6 +30,7 @@ import {
 import { historyReducer, startHistory } from "@/utils/editorState";
 import { friendlyError } from "@/utils/photo";
 import { clearHandoff, peekHandoff } from "@/utils/handoff";
+import { suggestAdjust } from "@/utils/autofix";
 
 const TABS = [
   { id: "adjust", label: "Adjust", icon: SlidersHorizontal },
@@ -53,6 +54,7 @@ export default function EditorPage() {
   const [format, setFormat] = useState("jpeg");
   const [quality, setQuality] = useState(92);
   const [saving, setSaving] = useState(false);
+  const [autoNote, setAutoNote] = useState(""); // what Auto-fix just did, in words
 
   const [history, dispatch] = useReducer(historyReducer, DEFAULT_EDIT, startHistory);
   const edit = history.present;
@@ -139,6 +141,7 @@ export default function EditorPage() {
       setCrop(null);
       setSelectedText(null);
       setTab("adjust");
+      setAutoNote("");
       setPhoto(opened);
     } catch (err) {
       setError(friendlyError(err, "We couldn't open that photo. Please try another one."));
@@ -147,7 +150,23 @@ export default function EditorPage() {
     }
   }
 
+  // Looks at the photo and sets the sliders for you. You can still change them after.
+  function autoFix() {
+    const thumb = photo.thumb;
+    const pixels = thumb.getContext("2d").getImageData(0, 0, thumb.width, thumb.height).data;
+    const { adjust: suggested, notes } = suggestAdjust(pixels);
+    if (notes.length === 0) {
+      setAutoNote("This photo already looks balanced, so nothing was changed.");
+      return;
+    }
+    setCrop(null);
+    apply((current) => ({ ...current, adjust: { ...current.adjust, ...suggested } }));
+    setTab("adjust");
+    setAutoNote(`Auto-fix ${notes.join(", ")}. Use Undo or the sliders to change it.`);
+  }
+
   function startOver() {
+    setAutoNote("");
     setPhoto(null);
     setCrop(null);
     setSelectedText(null);
@@ -275,9 +294,18 @@ export default function EditorPage() {
                 <Eye className="size-4" aria-hidden="true" />
                 Hold to compare
               </Button>
+              <Button variant="secondary" size="sm" onClick={autoFix} disabled={cropping}>
+                <Wand2 className="size-4" aria-hidden="true" />
+                Auto-fix
+              </Button>
               <Button variant="ghost" size="sm" onClick={startOver} className="sm:ml-auto">
                 New photo
               </Button>
+              {autoNote && (
+                <p className="basis-full text-sm text-muted" role="status">
+                  {autoNote}
+                </p>
+              )}
             </div>
 
             {/* The photo. On a phone it stays at the top while you move the sliders below it. */}

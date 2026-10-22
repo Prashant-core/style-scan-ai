@@ -11,7 +11,7 @@ from app.services.recommendations import classify
 
 router = APIRouter(prefix="/api/history", tags=["History"])
 
-TYPES = {"face_analysis", "skin_scan", "trial_room"}
+TYPES = {"face_analysis", "skin_scan", "trial_room", "edit"}
 
 # Older versions of the app saved these. They are hidden now, and deleted with "Delete my photos".
 OLD_TYPES = {"placement_photo", "placement_check"}

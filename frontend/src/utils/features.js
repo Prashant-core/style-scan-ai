@@ -2,6 +2,7 @@ import {
   Activity,
   History,
   House,
+  Images,
   MessageCircle,
   ScanFace,
   Settings,
@@ -36,6 +37,13 @@ export const FEATURES = [
     label: "Portrait tools",
     summary: "Blur, change or remove the background, and gently smooth skin.",
     icon: UserRound,
+    status: "live",
+  },
+  {
+    href: "/gallery",
+    label: "My gallery",
+    summary: "Your saved edits in one private place. Download, edit again or delete.",
+    icon: Images,
     status: "live",
   },
   {

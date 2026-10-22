@@ -42,6 +42,30 @@ def clean_photo(data: bytes, max_side: int = 1024, quality: int = 85) -> bytes:
     return out.getvalue()
 
 
+def clean_edit(data: bytes, max_side: int = 1600, quality: int = 86) -> bytes:
+    """Prepares an edited picture for the gallery. Like clean_photo, but see-through areas
+    (from a removed background) are filled with white instead of turning black."""
+    try:
+        image = Image.open(io.BytesIO(data))
+        if image.format not in ALLOWED_FORMATS:
+            raise ValueError("format")
+        image = ImageOps.exif_transpose(image)
+        if image.mode in ("RGBA", "LA") or "transparency" in image.info:
+            rgba = image.convert("RGBA")
+            flat = Image.new("RGB", rgba.size, (255, 255, 255))
+            flat.paste(rgba, mask=rgba.getchannel("A"))
+            image = flat
+        else:
+            image = image.convert("RGB")
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please upload a JPG, PNG or WebP photo.")
+
+    image.thumbnail((max_side, max_side))
+    out = io.BytesIO()
+    image.save(out, "JPEG", quality=quality, optimize=True)
+    return out.getvalue()
+
+
 def store_image(db: Session, user: User, data: bytes) -> StoredImage:
     """Saves a photo for this user. The caller commits."""
     count = db.scalar(

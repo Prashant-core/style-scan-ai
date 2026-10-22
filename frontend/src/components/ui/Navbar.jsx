@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 const LINKS = [
   { href: "/#what-it-does", label: "What it does" },
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/#privacy", label: "Privacy" },
+  { href: "/privacy", label: "Privacy" },
 ];
 
 const linkStyle =

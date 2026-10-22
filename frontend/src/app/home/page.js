@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import PrivateImage from "@/components/features/PrivateImage";
 import AppShell from "@/components/layout/AppShell";
 import Card from "@/components/ui/Card";
 import { useAuth } from "@/context/AuthContext";
@@ -63,6 +64,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const firstName = user?.full_name?.split(" ")[0];
   const [tip, setTip] = useState(null);
+  const [recent, setRecent] = useState([]); // the latest saved edits
 
   // The daily tip is a bonus. If it cannot load, the page works without it.
   useEffect(() => {
@@ -70,6 +72,18 @@ export default function HomePage() {
       .get("/api/tips/today")
       .then((data) => setTip(data.tip))
       .catch(() => setTip(null));
+  }, []);
+
+  // Also a bonus. Without it, the "Recent edits" box is simply not shown.
+  useEffect(() => {
+    let active = true;
+    api
+      .get("/api/history?scan_type=edit")
+      .then((data) => active && setRecent(data.slice(0, 4)))
+      .catch(() => active && setRecent([]));
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -91,6 +105,23 @@ export default function HomePage() {
               <Card className="bg-tape/25">
                 <h2 className="font-display text-2xl font-semibold tracking-tight">Tip of the day</h2>
                 <p className="mt-3 text-[15px] leading-relaxed">{tip}</p>
+              </Card>
+            )}
+            {recent.length > 0 && (
+              <Card>
+                <h2 className="font-display text-2xl font-semibold tracking-tight">Recent edits</h2>
+                <ul className="mt-4 grid grid-cols-2 gap-2">
+                  {recent.map((item) => (
+                    <li key={item.id}>
+                      <Link href="/gallery" aria-label="Open your gallery">
+                        <PrivateImage imageId={item.image_id} alt="A saved edit" className="aspect-square w-full rounded-lg object-cover" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/gallery" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">
+                  Open my gallery
+                </Link>
               </Card>
             )}
             <Card>

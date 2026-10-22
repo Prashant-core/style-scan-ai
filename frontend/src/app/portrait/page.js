@@ -12,6 +12,7 @@ import Slider from "@/components/editor/Slider";
 import { downloadBlob, loadPhoto } from "@/utils/editor";
 import { scaledCopy } from "@/utils/enhance";
 import { setHandoff } from "@/utils/handoff";
+import SaveToGallery from "@/components/features/SaveToGallery";
 import { friendlyError } from "@/utils/photo";
 import { coverFit, coverage, hexToRgb, renderPortrait, resizePlane } from "@/utils/portrait";
 import { segmentPortrait } from "@/utils/segment";
@@ -452,6 +453,7 @@ export default function PortraitPage() {
                   <PencilRuler className="size-4" aria-hidden="true" />
                   Open in the editor
                 </Button>
+                <SaveToGallery className="mt-3" source="portrait" getBlob={() => makeFile(`image/${fileType}`, 0.92)} />
               </Card>
             </aside>
           </div>

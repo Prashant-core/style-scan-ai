@@ -13,6 +13,7 @@ const FILTERS = [
   { id: "face_analysis", label: "Face analysis" },
   { id: "trial_room", label: "Trial room" },
   { id: "skin_scan", label: "Skin scans" },
+  { id: "edit", label: "Saved edits" },
 ];
 
 const LABELS = Object.fromEntries(FILTERS.map((f) => [f.id, f.label]));
@@ -27,6 +28,8 @@ function describe(item) {
       return `Skin score ${m.overall} / 100`;
     case "trial_room":
       return m.prompt;
+    case "edit":
+      return `Saved from the ${m.source === "enhancer" ? "photo enhancer" : m.source === "portrait" ? "portrait tools" : "photo editor"}`;
     default:
       return "";
   }

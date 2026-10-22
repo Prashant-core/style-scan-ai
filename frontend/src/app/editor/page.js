@@ -31,6 +31,7 @@ import { historyReducer, startHistory } from "@/utils/editorState";
 import { friendlyError } from "@/utils/photo";
 import { clearHandoff, peekHandoff } from "@/utils/handoff";
 import { suggestAdjust } from "@/utils/autofix";
+import SaveToGallery from "@/components/features/SaveToGallery";
 
 const TABS = [
   { id: "adjust", label: "Adjust", icon: SlidersHorizontal },
@@ -453,6 +454,11 @@ export default function EditorPage() {
                   <Download className="size-4" aria-hidden="true" />
                   {saving ? "Saving..." : "Download photo"}
                 </Button>
+                <SaveToGallery
+                  className="mt-3"
+                  source="editor"
+                  getBlob={() => exportBlob(photo, edit, { type: "image/jpeg", quality: 0.92 })}
+                />
               </Card>
             </aside>
           </div>

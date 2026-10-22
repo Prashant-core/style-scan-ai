@@ -22,6 +22,7 @@ import {
   scaledCopy,
 } from "@/utils/enhance";
 import { setHandoff } from "@/utils/handoff";
+import SaveToGallery from "@/components/features/SaveToGallery";
 import { friendlyError } from "@/utils/photo";
 
 // Whether this browser offers WebGPU (a fast way to use the graphics chip).
@@ -311,6 +312,7 @@ export default function EnhancePage() {
                       <PencilRuler className="size-4" aria-hidden="true" />
                       Open in the editor
                     </Button>
+                    <SaveToGallery className="mt-3" source="enhancer" getBlob={() => toBlob("image/jpeg", 0.92)} />
                   </Card>
 
                   <div className="flex flex-wrap gap-2">

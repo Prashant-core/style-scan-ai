@@ -28,7 +28,7 @@ const WHAT_IT_DOES = [
   },
   {
     name: "Trial room",
-    text: "Type what you want to try, like “leather jacket” or “short beard”. We redraw your selfie so you can see it before you buy.",
+    text: "Coming soon. Type what you want to try, like “leather jacket” or “short beard”, and see yourself in it before you buy.",
   },
   {
     name: "Skin tracker",

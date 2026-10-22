@@ -2,12 +2,15 @@
 
 import base64
 import json
+import logging
 
 import httpx
 
 from app.core.config import settings
 
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+
+log = logging.getLogger("uvicorn.error")
 
 
 class AiError(Exception):
@@ -17,6 +20,37 @@ class AiError(Exception):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
+
+
+def _google_message(response: httpx.Response) -> str:
+    """The real reason Google gave, for the server log."""
+    try:
+        return str(response.json()["error"]["message"])
+    except Exception:
+        return response.text[:300]
+
+
+def _error_for(model: str, response: httpx.Response) -> AiError:
+    """Turns a failed answer from Google into a clear message. The real reason is also printed in the server log."""
+    reason = _google_message(response)
+    log.warning("Gemini model %s answered %s: %s", model, response.status_code, reason)
+    lower = reason.lower()
+    code = response.status_code
+
+    if code == 429:
+        if "limit: 0" in lower or "free_tier" in lower or "free tier" in lower:
+            return AiError(
+                "This AI model has no free quota on the Gemini account. Use a model that has a free tier, or turn on billing.",
+                429,
+            )
+        return AiError("The AI service is busy, or its free limit is used up. Please try again later.", 429)
+    if "api key" in lower or code in (401, 403):
+        return AiError("The AI service refused the Gemini key. The site owner should check or replace it.", 502)
+    if "location" in lower and "not supported" in lower:
+        return AiError("This AI model is not available in the server's region.", 502)
+    if code == 404:
+        return AiError("The AI model name is wrong or no longer available. The site owner should check it.", 502)
+    return AiError("The AI service could not handle this request. Try a different photo or text.", 502)
 
 
 def _call(model: str, parts: list[dict], generation_config: dict) -> dict:
@@ -33,14 +67,8 @@ def _call(model: str, parts: list[dict], generation_config: dict) -> dict:
     except httpx.HTTPError:
         raise AiError("The AI service did not answer. Please try again in a moment.", 504)
 
-    if response.status_code == 429:
-        raise AiError("The AI service is busy, or its free limit is used up. Please try again later.", 429)
-    if response.status_code in (401, 403):
-        raise AiError("The AI service refused the request. The site owner should check the Gemini key.", 502)
-    if response.status_code == 404:
-        raise AiError("The AI model name is wrong or no longer available. The site owner should check it.", 502)
     if response.status_code >= 400:
-        raise AiError("The AI service could not handle this request. Try a different photo or text.", 502)
+        raise _error_for(model, response)
 
     data = response.json()
     block = (data.get("promptFeedback") or {}).get("blockReason")

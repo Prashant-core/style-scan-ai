@@ -7,6 +7,7 @@ import {
   Settings,
   Shirt,
   SlidersHorizontal,
+  UserRound,
   WandSparkles,
 } from "lucide-react";
 
@@ -31,6 +32,13 @@ export const FEATURES = [
     status: "live",
   },
   {
+    href: "/portrait",
+    label: "Portrait tools",
+    summary: "Blur, change or remove the background, and gently smooth skin.",
+    icon: UserRound,
+    status: "live",
+  },
+  {
     href: "/face-analysis",
     label: "Face analysis",
     summary: "Find your face shape and get haircut, beard and glasses ideas that fit it.",
@@ -42,7 +50,7 @@ export const FEATURES = [
     label: "Trial room",
     summary: "Type what you want to wear and see yourself in it before you buy.",
     icon: Shirt,
-    status: "live",
+    status: "soon", // needs a paid image AI. Change to "live" once billing is on for the Gemini key.
   },
   {
     href: "/skin-tracker",

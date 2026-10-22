@@ -2,8 +2,6 @@
 
 A photo and style web app. Measure your face to find your face shape, get haircut, beard and glasses ideas, edit and enhance photos, remove or blur backgrounds, track your skin over time, and chat with a style assistant. Photos are private and can be deleted at any time.
 
-Final-year major project by Prashant.
-
 - Website: https://style-scan-ai-sand.vercel.app
 - API: https://style-scan-ai.onrender.com
 

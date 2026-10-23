@@ -3,79 +3,57 @@ import Navbar from "@/components/ui/Navbar";
 import Logo from "@/components/ui/Logo";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
-import FaceDiagram from "@/components/ui/FaceDiagram";
+import PhotoWall from "@/components/home/PhotoWall";
 
 export const metadata = {
-  title: "StyleScan AI | Find the haircut and glasses that fit your face",
+  title: "StyleScan AI | Photo tools that stay on your device",
 };
 
-const WHAT_IT_DOES = [
+const TOOLS = [
   {
     name: "Photo editor",
-    text: "Crop, straighten, adjust light and colour, add filters and text, then save. It runs in your browser, so your photo stays on your device.",
+    text: "Crop, straighten, adjust light and colour, add filters and text. Auto-fix does the first pass for you.",
   },
   {
     name: "Photo enhancer",
-    text: "Make a small, blurry or old photo sharper. The AI runs inside your browser, so nothing is uploaded.",
+    text: "Make a small, soft or old photo sharper with an AI model that runs inside your browser.",
   },
   {
     name: "Portrait tools",
-    text: "Blur the background, swap it for a colour or a picture, or remove it. Gently smooth skin and even out its tone. All in your browser.",
+    text: "Blur, replace or remove the background. Gently smooth skin and even out its tone.",
   },
   {
     name: "My gallery",
-    text: "Save the pictures you like in one private place. Download them, edit them again or delete them any time.",
+    text: "Save the pictures you like in one private place. Download, edit again or delete them.",
   },
   {
     name: "Face analysis",
-    text: "We measure your forehead, cheekbones, jaw and face length to find your face shape. Then you get haircut, beard and glasses ideas that suit it.",
-  },
-  {
-    name: "Trial room",
-    text: "Coming soon. Type what you want to try, like “leather jacket” or “short beard”, and see yourself in it before you buy.",
+    text: "Measure your face to find its shape, then get haircut, beard and glasses ideas that suit it.",
   },
   {
     name: "Skin tracker",
-    text: "Scan your skin once a day. A simple graph shows if your routine is working.",
+    text: "Scan your skin once a day and see on a simple graph whether your routine works.",
   },
   {
     name: "Style assistant",
-    text: "Ask a question in plain words. The answer uses your own results, not general tips.",
+    text: "Ask a question in plain words. The answer uses your own results.",
   },
   {
-    name: "Daily tip",
-    text: "One short idea each day, based on your latest scan.",
+    name: "Trial room",
+    text: "Coming soon. Type what you want to wear and see yourself in it before you buy.",
   },
 ];
 
 const STEPS = [
-  {
-    title: "Upload a selfie",
-    text: "Use a clear photo of your face in good light. It takes a few seconds.",
-  },
-  {
-    title: "Read your results",
-    text: "See your face shape, your measurements and the styles that fit.",
-  },
-  {
-    title: "Try, track and improve",
-    text: "Try new looks in the trial room and check your skin progress over time.",
-  },
+  { title: "Open a photo", text: "Pick one from your phone or computer. Nothing is sent anywhere yet." },
+  { title: "Edit it", text: "Use the tools. The work happens on your device, so it is quick and private." },
+  { title: "Save or download", text: "Download it, or save it to your private gallery. Delete it whenever you like." },
 ];
 
 const PRIVACY = [
-  {
-    title: "Only you can see them",
-    text: "Your photos and results are private to your account.",
-  },
-  {
-    title: "Delete them any time",
-    text: "Remove your photos or your whole account whenever you want.",
-  },
-  {
-    title: "Passwords stay secret",
-    text: "We save a scrambled version of your password, never the password itself.",
-  },
+  { title: "Only you can see them", text: "Your photos and results belong to your account." },
+  { title: "Delete any time", text: "Remove one photo, all photos, or the whole account." },
+  { title: "Passwords stay secret", text: "We keep a scrambled version of your password, never the password itself." },
 ];
 
 export default function IntroPage() {
@@ -84,106 +62,65 @@ export default function IntroPage() {
       <Navbar />
 
       <main>
-        {/* Hero */}
-        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8 lg:pb-28 lg:pt-20">
-          <div>
-            <Reveal onLoad>
-              <h1 className="font-display text-[3.5rem] font-semibold leading-[0.92] tracking-tight sm:text-7xl lg:text-[5.75rem]">
-                Find the haircut and glasses that fit your face.
-              </h1>
-            </Reveal>
-            <Reveal onLoad delay={0.1}>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-                Upload one selfie. StyleScan AI measures your face, finds your
-                face shape and shows you the styles that suit it. A free photo
-                editor helps you polish the picture too.
-              </p>
-            </Reveal>
-            <Reveal onLoad delay={0.2} className="mt-9 flex flex-wrap gap-3">
+        {/* Top: one calm sentence */}
+        <section className="mx-auto grid max-w-6xl items-end gap-8 px-5 pb-14 pt-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 lg:px-8 lg:pb-20 lg:pt-20">
+          <Reveal onLoad>
+            <h1 className="font-display text-[2.6rem] leading-[1] sm:text-6xl lg:text-[4.4rem]">
+              Photo tools that stay on your device.
+            </h1>
+          </Reveal>
+          <Reveal onLoad delay={0.08} className="flex flex-col gap-6 pb-1">
+            <p className="max-w-md text-lg leading-relaxed text-muted">
+              Edit, sharpen and clean up portraits right in your browser. Nothing is uploaded unless you choose to
+              save it, and everything you save can be deleted.
+            </p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <Button href="/signup" size="lg">
-                Create account
+                Create free account
               </Button>
-              <Button href="/#how-it-works" variant="secondary" size="lg">
-                See how it works
-              </Button>
-            </Reveal>
-            <Reveal onLoad delay={0.3}>
-              <p className="mt-5 text-sm text-muted">
-                Free to use. Your photos stay private.
-              </p>
-            </Reveal>
-          </div>
-
-          <div className="rounded-2xl bg-ink p-5 sm:p-8">
-            <FaceDiagram className="w-full" />
-            <Reveal
-              onLoad
-              delay={3.4}
-              className="mt-6 border-t border-white/15 pt-5 text-white"
-            >
-              <p className="text-sm text-white/60">Example result</p>
-              <p className="mt-1 font-display text-3xl font-semibold">
-                Oval face
-              </p>
-              <p className="mt-2 max-w-md text-white/75">
-                Your jaw is narrower than your cheekbones. Most haircuts and
-                frame styles suit this shape.
-              </p>
-            </Reveal>
-          </div>
+              <Link
+                href="/#what-it-does"
+                className="text-[15px] underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+              >
+                See the tools
+              </Link>
+            </div>
+          </Reveal>
         </section>
 
-        {/* What it does */}
-        <section
-          id="what-it-does"
-          className="mx-auto max-w-6xl scroll-mt-16 px-5 pb-20 lg:px-8 lg:pb-28"
-        >
-          <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
-            What you can do
-          </h2>
+        {/* The photo wall */}
+        <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8" aria-label="What the tools can do">
+          <Reveal delay={0.05}>
+            <PhotoWall />
+          </Reveal>
+        </section>
 
-          <ul className="mt-12 border-t border-ink">
-            {WHAT_IT_DOES.map((item) => (
+        {/* Tools */}
+        <section id="what-it-does" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Tools</p>
+          <ul className="mt-5 border-t border-line">
+            {TOOLS.map((item) => (
               <li
                 key={item.name}
-                className="grid gap-2 border-b border-line py-7 transition-colors hover:bg-surface md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-12 md:px-4"
+                className="grid gap-1 border-b border-line py-5 transition-colors hover:bg-surface md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-12 md:px-3"
               >
-                <h3 className="font-display text-3xl font-semibold tracking-tight">
-                  {item.name}
-                </h3>
-                <p className="max-w-xl text-[17px] leading-relaxed text-muted">
-                  {item.text}
-                </p>
+                <h2 className="font-display text-2xl">{item.name}</h2>
+                <p className="max-w-xl text-[16px] leading-relaxed text-muted">{item.text}</p>
               </li>
             ))}
           </ul>
         </section>
 
         {/* How it works */}
-        <section
-          id="how-it-works"
-          className="scroll-mt-16 border-y border-line bg-surface py-20 lg:py-28"
-        >
+        <section id="how-it-works" className="scroll-mt-20 border-y border-line bg-surface py-16 lg:py-24">
           <div className="mx-auto max-w-6xl px-5 lg:px-8">
-            <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
-              How it works
-            </h2>
-
-            <div className="ruler mt-12" aria-hidden="true" />
-
-            <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">How it works</p>
+            <ol className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
               {STEPS.map((step, index) => (
                 <li key={step.title}>
-                  <Reveal delay={index * 0.1}>
-                    <span className="inline-block border-b-4 border-tape pb-1 font-display text-6xl font-semibold leading-none">
-                      {index + 1}
-                    </span>
-                    <h3 className="mt-5 font-display text-3xl font-semibold tracking-tight">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 max-w-xs text-[17px] leading-relaxed text-muted">
-                      {step.text}
-                    </p>
+                  <Reveal delay={index * 0.08}>
+                    <h3 className="font-display text-2xl">{step.title}</h3>
+                    <p className="mt-2 max-w-xs text-[16px] leading-relaxed text-muted">{step.text}</p>
                   </Reveal>
                 </li>
               ))}
@@ -192,33 +129,21 @@ export default function IntroPage() {
         </section>
 
         {/* Privacy */}
-        <section
-          id="privacy"
-          className="mx-auto max-w-6xl scroll-mt-16 px-5 py-20 lg:px-8 lg:py-28"
-        >
-          <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
-            <h2 className="font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
-              Your photos stay yours.
-            </h2>
+        <section id="privacy" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+            <h2 className="font-display text-4xl leading-none sm:text-5xl">Your photos stay yours.</h2>
             <div>
-              <dl className="border-t border-ink">
+              <dl className="border-t border-line">
                 {PRIVACY.map((item) => (
-                  <div
-                    key={item.title}
-                    className="border-b border-line py-6 md:grid md:grid-cols-[1fr_1.4fr] md:gap-8"
-                  >
-                    <dt className="font-display text-2xl font-semibold tracking-tight">
-                      {item.title}
-                    </dt>
-                    <dd className="mt-1 text-[17px] leading-relaxed text-muted md:mt-0">
-                      {item.text}
-                    </dd>
+                  <div key={item.title} className="border-b border-line py-5 md:grid md:grid-cols-[1fr_1.4fr] md:gap-8">
+                    <dt className="font-display text-xl">{item.title}</dt>
+                    <dd className="mt-1 text-[16px] leading-relaxed text-muted md:mt-0">{item.text}</dd>
                   </div>
                 ))}
               </dl>
               <Link
                 href="/privacy"
-                className="mt-6 inline-block text-[17px] font-medium underline underline-offset-4"
+                className="mt-6 inline-block text-[15px] underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
               >
                 Read the full privacy page
               </Link>
@@ -226,40 +151,28 @@ export default function IntroPage() {
           </div>
         </section>
 
-        {/* Final call to action and footer */}
-        <section className="bg-ink text-white">
-          <div className="mx-auto max-w-6xl px-5 py-20 lg:px-8 lg:py-28">
-            <h2 className="max-w-2xl font-display text-5xl font-semibold leading-none tracking-tight sm:text-6xl">
-              See what fits before you spend money.
+        {/* Last call to action and footer */}
+        <section className="border-t border-line">
+          <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-5 py-16 lg:px-8 lg:py-24">
+            <h2 className="max-w-2xl font-display text-4xl leading-none sm:text-5xl">
+              Try it with one photo. It takes a minute.
             </h2>
-            <p className="mt-5 max-w-lg text-lg text-white/70">
-              Create a free account and upload your first selfie.
-            </p>
-            <Button href="/signup" variant="light" size="lg" className="mt-9">
-              Create account
+            <Button href="/signup" size="lg">
+              Create free account
             </Button>
           </div>
 
-          <footer className="border-t border-white/15">
-            <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-8 text-sm text-white/60 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-              <Logo tone="light" />
+          <footer className="border-t border-line">
+            <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-8">
+              <Logo />
               <div className="flex items-center gap-6">
-                <Link
-                  href="/login"
-                  className="transition-colors hover:text-white"
-                >
+                <Link href="/login" className="transition-colors hover:text-ink">
                   Log in
                 </Link>
-                <Link
-                  href="/signup"
-                  className="transition-colors hover:text-white"
-                >
+                <Link href="/signup" className="transition-colors hover:text-ink">
                   Create account
                 </Link>
-                <Link
-                  href="/privacy"
-                  className="transition-colors hover:text-white"
-                >
+                <Link href="/privacy" className="transition-colors hover:text-ink">
                   Privacy
                 </Link>
               </div>

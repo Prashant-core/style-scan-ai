@@ -50,17 +50,17 @@ export default function CompareSlider({ before, after }) {
         aria-hidden="true"
       />
       <span
-        className="pointer-events-none absolute top-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-ink shadow-lg"
+        className="pointer-events-none absolute top-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-lg"
         style={{ left: `${position}%` }}
         aria-hidden="true"
       >
         <MoveHorizontal className="size-5" />
       </span>
 
-      <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-ink/70 px-3 py-1 text-xs font-semibold text-white">
+      <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold text-white">
         Before
       </span>
-      <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-ink/70 px-3 py-1 text-xs font-semibold text-white">
+      <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold text-white">
         After
       </span>
 

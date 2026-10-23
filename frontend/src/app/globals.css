@@ -1,30 +1,90 @@
 @import "tailwindcss";
 
-/* Colors: paper and white for surfaces, ink for text and buttons,
-   tape yellow only for measurements and highlights. */
+/* "Paper Studio" theme.
+   Warm grey paper, near-black ink, thin lines. The accent colour (tape) is the same as ink,
+   so the app stays quiet and the photos are the colourful part.
+   Light colours are defined here. Dark colours are further down, for the device setting
+   and for the Light / Dark switch (data-theme on the <html> tag). */
 @theme {
-  --color-paper: #f3f4f1;
-  --color-surface: #ffffff;
-  --color-ink: #0f1a2a;
-  --color-ink-soft: #1b2a3f;
-  --color-muted: #566170;
-  --color-line: #d9dee3;
-  --color-tape: #f2c230;
-  --color-tape-soft: #fbf1cc;
+  --color-paper: #f4f3f0;
+  --color-surface: #fbfaf8;
+  --color-ink: #141414;
+  --color-ink-soft: #2a2a28;
+  --color-muted: #6a6965;
+  --color-line: #dedcd7;
+  --color-tape: #141414;
+  --color-tape-soft: #e9e7e1;
   --color-danger: #b3261e;
   --color-danger-soft: #fceae9;
   --color-success: #1b7f4b;
+
+  /* Small, calm corners */
+  --radius-md: 5px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
 }
 
-/* Fonts are loaded in layout.js */
+/* Fonts are loaded in layout.js (Geist, from the "geist" package) */
 @theme inline {
-  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Dark colours. Same names, new values. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper: #111110;
+    --color-surface: #1a1a18;
+    --color-ink: #ecebe7;
+    --color-ink-soft: #d4d3cf;
+    --color-muted: #9a9993;
+    --color-line: #2a2a28;
+    --color-tape: #ecebe7;
+    --color-tape-soft: #262624;
+    --color-danger: #f1857c;
+    --color-danger-soft: #2b1715;
+    --color-success: #4fbf86;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-paper: #111110;
+  --color-surface: #1a1a18;
+  --color-ink: #ecebe7;
+  --color-ink-soft: #d4d3cf;
+  --color-muted: #9a9993;
+  --color-line: #2a2a28;
+  --color-tape: #ecebe7;
+  --color-tape-soft: #262624;
+  --color-danger: #f1857c;
+  --color-danger-soft: #2b1715;
+  --color-success: #4fbf86;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Text on an "ink" background must flip with the theme: light text on dark ink, dark text on light ink.
+   Many buttons and chips use "bg-ink text-white". This one rule makes them all work in both themes. */
+.bg-ink.text-white {
+  color: var(--color-paper);
+}
+
+/* Headings: a little lighter and tighter than the default bold look */
+.font-display {
+  font-weight: 500;
+  letter-spacing: -0.03em;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -33,8 +93,8 @@
   }
 
   ::selection {
-    background: var(--color-tape);
-    color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
 
   :focus-visible {
@@ -56,6 +116,115 @@
     background-repeat: repeat-x;
     background-position: left bottom;
     opacity: 0.35;
+  }
+}
+
+/* ---------- The photo wall (home page and login pages) ---------- */
+.pw-wall {
+  columns: 2;
+  column-gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .pw-wall {
+    columns: 3;
+    column-gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pw-wall {
+    columns: 4;
+  }
+}
+
+.pw-tile {
+  break-inside: avoid;
+  margin: 0 0 22px;
+}
+
+.pw-photo {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  aspect-ratio: var(--ar);
+  background: var(--c1);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.pw-tile:hover .pw-photo,
+.pw-tile:focus-visible .pw-photo {
+  transform: translateY(-3px);
+}
+
+.pw-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Placeholder "photo" made of soft colour, used until real photos are added */
+.pw-soft {
+  background:
+    radial-gradient(120% 90% at 30% 15%, var(--c2), transparent 60%),
+    radial-gradient(90% 80% at 80% 100%, var(--c3), transparent 65%),
+    var(--c1);
+}
+
+.pw-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* The "before" half: plain grey, shown from the left. On hover the line slides to show more of "after". */
+.pw-before {
+  filter: grayscale(1) contrast(0.7) brightness(1.08);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.pw-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 1px;
+  background: #fff;
+  opacity: 0;
+  transition:
+    left 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.3s;
+}
+
+.pw-tile.pw-ba:hover .pw-before,
+.pw-tile.pw-ba:focus-visible .pw-before {
+  clip-path: inset(0 35% 0 0);
+}
+
+.pw-tile.pw-ba:hover .pw-line,
+.pw-tile.pw-ba:focus-visible .pw-line {
+  left: 65%;
+  opacity: 0.9;
+}
+
+/* On phones there is no hover, so the line rests in the middle */
+@media (hover: none) {
+  .pw-tile.pw-ba .pw-before {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .pw-tile.pw-ba .pw-line {
+    left: 50%;
+    opacity: 0.9;
   }
 }
 

@@ -42,7 +42,7 @@ export default function FaceOverlay({ src, lines, aspect }) {
       {lines.flatMap((item) => [item.from, item.to]).map((point, index) => (
         <span
           key={index}
-          className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-tape ring-2 ring-ink"
+          className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white ring-2 ring-black"
           style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }}
           aria-hidden="true"
         />

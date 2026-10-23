@@ -1,30 +1,35 @@
-import { Barlow_Condensed, Public_Sans } from "next/font/google";
 import "./globals.css";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import { AuthProvider } from "@/context/AuthContext";
 
-const publicSans = Public_Sans({
-  subsets: ["latin"],
-  variable: "--font-public-sans",
-  display: "swap",
-});
-
-const barlow = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-barlow",
-  display: "swap",
-});
-
-// Each page sets its own title with a <title> tag, so there is no default title here.
 export const metadata = {
+  title: { default: "StyleScan AI", template: "%s" },
   description:
-    "Upload one selfie. StyleScan AI measures your face shape and shows you the haircuts and glasses that fit.",
+    "Photo tools that run in your browser: edit, sharpen, blur backgrounds, find your face shape and track your skin. Your photos stay private.",
   icons: { icon: "/logo.svg" },
 };
 
+// The colour of the phone's top bar follows the theme
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f3f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#111110" },
+  ],
+};
+
+// Runs before the page is drawn, so a saved Light or Dark choice shows with no flash
+const themeScript = `try{var t=localStorage.getItem("stylescan-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${publicSans.variable} ${barlow.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>

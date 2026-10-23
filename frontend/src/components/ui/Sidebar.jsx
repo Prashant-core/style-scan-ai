@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, X } from "lucide-react";
 import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { ACCOUNT_ITEMS, FEATURES, HOME_ITEM } from "@/utils/features";
 
@@ -97,6 +98,7 @@ function SidebarBody({ onNavigate, onClose }) {
           <p className="truncate text-sm font-semibold text-ink">{user?.full_name}</p>
           <p className="truncate text-sm text-muted">@{user?.username}</p>
         </div>
+        <ThemeToggle />
         <button
           type="button"
           onClick={handleLogout}
@@ -132,7 +134,7 @@ export default function Sidebar({ open, onClose }) {
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <motion.div
-              className="absolute inset-0 bg-ink/40"
+              className="absolute inset-0 bg-black/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

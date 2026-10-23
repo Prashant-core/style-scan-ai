@@ -3,22 +3,18 @@ import { Loader2 } from "lucide-react";
 
 const sizes = {
   sm: "h-9 px-4 text-sm",
-  md: "h-11 px-6 text-[15px]",
-  lg: "h-[52px] px-8 text-base",
+  md: "h-11 px-5 text-[15px]",
+  lg: "h-12 px-6 text-base",
 };
 
-// On hover, a colored layer slides across the button (like pulling a tape measure).
+// Flat colours. On hover a button rises 1px and fades a little. Pressing it shrinks it slightly.
 const variants = {
-  primary: "bg-ink text-white before:bg-tape hover:text-ink focus-visible:text-ink",
-  secondary:
-    "border border-ink/30 text-ink before:bg-ink hover:border-ink hover:text-white focus-visible:text-white",
-  light: "bg-white text-ink before:bg-tape",
-  danger: "bg-danger text-white before:bg-ink",
+  primary: "bg-ink text-paper hover:-translate-y-px hover:opacity-90",
+  secondary: "border border-line text-ink hover:-translate-y-px hover:border-ink",
+  light: "bg-paper text-ink hover:-translate-y-px hover:opacity-90",
+  danger: "bg-danger text-paper hover:-translate-y-px hover:opacity-90",
   ghost: "text-ink hover:bg-ink/5",
 };
-
-const sweep =
-  "relative isolate overflow-hidden before:absolute before:inset-0 before:-z-10 before:-translate-x-full before:transition-transform before:duration-300 before:ease-out hover:before:translate-x-0 focus-visible:before:translate-x-0";
 
 export default function Button({
   href,
@@ -32,8 +28,7 @@ export default function Button({
   ...props
 }) {
   const classes = [
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-300 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60",
-    variant === "ghost" ? "" : sweep,
+    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60",
     variants[variant],
     sizes[size],
     className,

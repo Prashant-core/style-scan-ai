@@ -18,6 +18,10 @@
   --color-danger-soft: #fceae9;
   --color-success: #1b7f4b;
 
+  /* The one bright colour: measuring-tape yellow. Used for the main buttons and highlights. */
+  --color-accent: #ffc933;
+  --color-on-accent: #141414;
+
   /* Small, calm corners */
   --radius-md: 5px;
   --radius-lg: 6px;

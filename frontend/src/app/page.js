@@ -1,186 +1,239 @@
 import Link from "next/link";
+import { ArrowRight, Laptop, Smartphone, Tablet, Download } from "lucide-react";
 import Navbar from "@/components/ui/Navbar";
-import Logo from "@/components/ui/Logo";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
-import PhotoWall from "@/components/home/PhotoWall";
+import SiteFooter from "@/components/ui/SiteFooter";
+import ActionBar from "@/components/home/ActionBar";
+import Carousel from "@/components/home/Carousel";
+import GoalTabs from "@/components/home/GoalTabs";
+import MediaCard from "@/components/home/MediaCard";
+import { ChatArt, FaceArt, SkinArt } from "@/components/home/CardArt";
+import { EditorIcon, FaceIcon } from "@/components/ui/ToolIcons";
 
 export const metadata = {
-  title: "StyleScan AI | Photo tools that stay on your device",
+  title: "StyleScan AI | Edit, enhance and style your photos",
 };
 
-const TOOLS = [
+const W = "/wall/";
+
+// The tall cards at the top of the page
+const HERO_CARDS = [
+  { href: "/enhance", title: "Sharpen any small photo", tag: "Enhancer", before: W + "enhance-before.jpg", after: W + "enhance-after.jpg" },
+  { href: "/portrait", title: "Blur or remove the background", tag: "Portrait", before: W + "blur-before.jpg", after: W + "blur-after.jpg" },
+  { href: "/editor", title: "Fix the light in one tap", tag: "Auto-fix", before: W + "autofix-before.jpg", after: W + "autofix-after.jpg" },
+  { href: "/face-analysis", title: "Find your face shape", tag: "Face analysis", after: W + "face-shape.jpg" },
+  { href: "/editor", title: "Crop, filter and add text", tag: "Editor", before: W + "filters-before.jpg", after: W + "filters-after.jpg" },
+];
+
+const GOALS = [
   {
-    name: "Photo editor",
-    text: "Crop, straighten, adjust light and colour, add filters and text. Auto-fix does the first pass for you.",
+    id: "profile",
+    label: "Profile photo",
+    cards: [
+      { href: "/portrait", title: "Blur a busy background", tag: "Portrait", before: W + "blur-before.jpg", after: W + "blur-after.jpg" },
+      { href: "/portrait", title: "Smooth skin, keep detail", tag: "Portrait", before: W + "smooth-before.jpg", after: W + "smooth-after.jpg" },
+      { href: "/editor", title: "Brighten a dark photo", tag: "Auto-fix", before: W + "autofix-before.jpg", after: W + "autofix-after.jpg" },
+    ],
   },
   {
-    name: "Photo enhancer",
-    text: "Make a small, soft or old photo sharper with an AI model that runs inside your browser.",
+    id: "social",
+    label: "Social post",
+    cards: [
+      { href: "/editor", title: "Crop to a square and add a filter", tag: "Editor", before: W + "filters-before.jpg", after: W + "filters-after.jpg" },
+      { href: "/editor", title: "Add text on your photo", tag: "Editor", after: W + "saved.jpg" },
+      { href: "/enhance", title: "Sharpen before you post", tag: "Enhancer", before: W + "enhance-before.jpg", after: W + "enhance-after.jpg" },
+    ],
   },
   {
-    name: "Portrait tools",
-    text: "Blur, replace or remove the background. Gently smooth skin and even out its tone.",
+    id: "old",
+    label: "Old or small photo",
+    cards: [
+      { href: "/enhance", title: "Make it twice as big and sharp", tag: "Enhancer", before: W + "enhance-before.jpg", after: W + "enhance-after.jpg" },
+      { href: "/editor", title: "Fix colour and contrast", tag: "Auto-fix", before: W + "autofix-before.jpg", after: W + "autofix-after.jpg" },
+      { href: "/gallery", title: "Keep the result in your gallery", tag: "Gallery", after: W + "saved.jpg" },
+    ],
   },
   {
-    name: "My gallery",
-    text: "Save the pictures you like in one private place. Download, edit again or delete them.",
-  },
-  {
-    name: "Face analysis",
-    text: "Measure your face to find its shape, then get haircut, beard and glasses ideas that suit it.",
-  },
-  {
-    name: "Skin tracker",
-    text: "Scan your skin once a day and see on a simple graph whether your routine works.",
-  },
-  {
-    name: "Style assistant",
-    text: "Ask a question in plain words. The answer uses your own results.",
-  },
-  {
-    name: "Trial room",
-    text: "Coming soon. Type what you want to wear and see yourself in it before you buy.",
+    id: "look",
+    label: "My look",
+    cards: [
+      { href: "/face-analysis", title: "Find your face shape", tag: "Face analysis", after: W + "face-shape.jpg" },
+      { href: "/face-analysis", title: "Get haircut and glasses ideas", tag: "Face analysis", after: W + "face-shape.jpg" },
+      { href: "/skin-tracker", title: "Track your skin over time", tag: "Skin tracker", after: W + "smooth-after.jpg" },
+    ],
   },
 ];
 
-const STEPS = [
-  { title: "Open a photo", text: "Pick one from your phone or computer. Nothing is sent anywhere yet." },
-  { title: "Edit it", text: "Use the tools. The work happens on your device, so it is quick and private." },
-  { title: "Save or download", text: "Download it, or save it to your private gallery. Delete it whenever you like." },
+const SCREENS = [
+  { icon: Smartphone, title: "On your phone", text: "Large buttons and sliders you can reach with a thumb." },
+  { icon: Tablet, title: "On a tablet", text: "The tools sit beside your photo, so you can see every change." },
+  { icon: Laptop, title: "On a computer", text: "Keyboard shortcuts such as Ctrl+Z, plus the full-size photo." },
+  { icon: Download, title: "As an app", text: "Install it on your Android home screen.", soon: true },
 ];
 
 const PRIVACY = [
-  { title: "Only you can see them", text: "Your photos and results belong to your account." },
-  { title: "Delete any time", text: "Remove one photo, all photos, or the whole account." },
-  { title: "Passwords stay secret", text: "We keep a scrambled version of your password, never the password itself." },
+  { title: "On your device", text: "The photo editor, enhancer and portrait tools run in your browser. Your photo is not uploaded while you use them." },
+  { title: "Private to you", text: "Anything you save is shown only to your account. Every account has its own random ID." },
+  { title: "Delete anything", text: "Remove one picture, all of them, or your whole account. It takes a few clicks." },
 ];
+
+function SectionHead({ icon: Icon, title, href, linkLabel }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      <h2 className="flex items-center gap-3 font-display text-3xl leading-none sm:text-5xl">
+        {Icon && <Icon className="size-8 shrink-0 sm:size-10" />}
+        {title}
+      </h2>
+      {href && (
+        <Link href={href} className="group inline-flex items-center gap-1.5 text-[15px] font-medium">
+          {linkLabel}
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+        </Link>
+      )}
+    </div>
+  );
+}
 
 export default function IntroPage() {
   return (
     <>
+      {/* A thin bar at the very top, about what is new */}
+      <div className="bg-accent text-on-accent">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-5 py-2.5 text-sm">
+          <p className="font-medium">
+            New: Portrait tools. Blur or remove a background in your browser.
+          </p>
+          <Link
+            href="/portrait"
+            className="rounded-full bg-black px-3.5 py-1 text-[13px] font-medium text-white transition-transform hover:-translate-y-px"
+          >
+            Try it
+          </Link>
+        </div>
+      </div>
+
       <Navbar />
 
       <main>
-        {/* Top: one calm sentence */}
-        <section className="mx-auto grid max-w-6xl items-end gap-8 px-5 pb-14 pt-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16 lg:px-8 lg:pb-20 lg:pt-20">
-          <Reveal onLoad>
-            <h1 className="font-display text-[2.6rem] leading-[1] sm:text-6xl lg:text-[4.4rem]">
-              Photo tools that stay on your device.
+        {/* Top: a headline and a row of tall cards */}
+        <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-16 pt-10 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:gap-12 lg:px-8 lg:pb-24 lg:pt-16">
+          <Reveal onLoad className="flex flex-col items-start gap-6">
+            <h1 className="font-display text-[2.6rem] leading-[1.1] sm:text-6xl">
+              Edit, enhance and style your photos on{" "}
+              <span className="whitespace-nowrap rounded-md bg-accent px-2 text-on-accent">every screen</span>
             </h1>
-          </Reveal>
-          <Reveal onLoad delay={0.08} className="flex flex-col gap-6 pb-1">
             <p className="max-w-md text-lg leading-relaxed text-muted">
-              Edit, sharpen and clean up portraits right in your browser. Nothing is uploaded unless you choose to
-              save it, and everything you save can be deleted.
+              A photo editor, an AI enhancer, portrait tools and a face and skin guide. They run in your browser, so
+              your photo stays on your device.
             </p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Button href="/signup" size="lg">
-                Create free account
-              </Button>
-              <Link
-                href="/#what-it-does"
-                className="text-[15px] underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
-              >
-                See the tools
-              </Link>
-            </div>
+            <Button href="/signup" variant="accent" pill size="lg">
+              Start creating
+              <ArrowRight className="size-5" aria-hidden="true" />
+            </Button>
+          </Reveal>
+
+          <Reveal onLoad delay={0.1} className="min-w-0">
+            <Carousel label="What you can do">
+              {HERO_CARDS.map((card) => (
+                <MediaCard key={card.title} {...card} size="w-[210px] aspect-[9/16] sm:w-[250px]" />
+              ))}
+            </Carousel>
           </Reveal>
         </section>
 
-        {/* The photo wall */}
-        <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8" aria-label="What the tools can do">
-          <Reveal delay={0.05}>
-            <PhotoWall />
+        {/* Photo tools */}
+        <section id="what-it-does" className="mx-auto max-w-7xl scroll-mt-24 px-5 py-12 lg:px-8 lg:py-16">
+          <Reveal>
+            <SectionHead icon={EditorIcon} title="Edit photos in your browser" href="/editor" linkLabel="Open the editor" />
           </Reveal>
+          <Carousel label="Photo tools" className="mt-8">
+            <MediaCard href="/editor" title="Photo editor: crop, light, colour, filters, text" tag="Editor" before={W + "filters-before.jpg"} after={W + "filters-after.jpg"} size="w-[280px] aspect-[4/3] sm:w-[420px]" />
+            <MediaCard href="/enhance" title="Photo enhancer: sharper and twice as big" tag="AI" before={W + "enhance-before.jpg"} after={W + "enhance-after.jpg"} size="w-[280px] aspect-[4/3] sm:w-[420px]" />
+            <MediaCard href="/portrait" title="Portrait tools: change the background" tag="Portrait" before={W + "blur-before.jpg"} after={W + "blur-after.jpg"} size="w-[280px] aspect-[4/3] sm:w-[420px]" />
+            <MediaCard href="/gallery" title="My gallery: your saved edits, private" tag="Private" after={W + "saved.jpg"} size="w-[280px] aspect-[4/3] sm:w-[420px]" />
+          </Carousel>
         </section>
 
-        {/* Tools */}
-        <section id="what-it-does" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Tools</p>
-          <ul className="mt-5 border-t border-line">
-            {TOOLS.map((item) => (
-              <li
-                key={item.name}
-                className="grid gap-1 border-b border-line py-5 transition-colors hover:bg-surface md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-12 md:px-3"
-              >
-                <h2 className="font-display text-2xl">{item.name}</h2>
-                <p className="max-w-xl text-[16px] leading-relaxed text-muted">{item.text}</p>
+        {/* Face and skin */}
+        <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
+          <Reveal>
+            <SectionHead icon={FaceIcon} title="Know your face and your skin" href="/face-analysis" linkLabel="Try face analysis" />
+          </Reveal>
+          <Carousel label="Face and skin" className="mt-8">
+            <MediaCard href="/face-analysis" title="Face analysis: your shape and what suits it" tag="Face" size="w-[280px] aspect-[4/3] sm:w-[420px]">
+              <FaceArt />
+            </MediaCard>
+            <MediaCard href="/skin-tracker" title="Skin tracker: see if your routine works" tag="Daily" size="w-[280px] aspect-[4/3] sm:w-[420px]">
+              <SkinArt />
+            </MediaCard>
+            <MediaCard href="/assistant" title="Style assistant: answers from your results" tag="Chat" size="w-[280px] aspect-[4/3] sm:w-[420px]">
+              <ChatArt />
+            </MediaCard>
+          </Carousel>
+        </section>
+
+        {/* Start from a goal */}
+        <section id="how-it-works" className="mx-auto max-w-7xl scroll-mt-24 px-5 py-12 lg:px-8 lg:py-16">
+          <Reveal>
+            <SectionHead title="Start from what you want to make" />
+          </Reveal>
+          <div className="mt-8">
+            <GoalTabs goals={GOALS} />
+          </div>
+        </section>
+
+        {/* Every screen */}
+        <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
+          <Reveal>
+            <SectionHead title="Made for every screen" />
+          </Reveal>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {SCREENS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.title} className="rounded-[20px] border border-line bg-surface p-6">
+                  <div className="flex items-start justify-between">
+                    <Icon className="size-9" strokeWidth={1.3} aria-hidden="true" />
+                    {item.soon && <span className="rounded-full border border-line px-2.5 py-0.5 text-xs text-muted">Soon</span>}
+                  </div>
+                  <h3 className="mt-10 font-display text-2xl">{item.title}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-muted">{item.text}</p>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Privacy */}
+        <section id="privacy" className="mx-auto max-w-7xl scroll-mt-24 px-5 py-12 lg:px-8 lg:py-16">
+          <Reveal>
+            <SectionHead title="Your photos stay yours" href="/privacy" linkLabel="Read the privacy page" />
+          </Reveal>
+          <ul className="mt-8 grid gap-4 md:grid-cols-3">
+            {PRIVACY.map((item) => (
+              <li key={item.title} className="flex flex-col justify-between gap-12 rounded-[20px] border border-line bg-surface p-7">
+                <h3 className="font-display text-3xl leading-tight">{item.title}</h3>
+                <p className="text-[16px] leading-relaxed text-muted">{item.text}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* How it works */}
-        <section id="how-it-works" className="scroll-mt-20 border-y border-line bg-surface py-16 lg:py-24">
-          <div className="mx-auto max-w-6xl px-5 lg:px-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">How it works</p>
-            <ol className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
-              {STEPS.map((step, index) => (
-                <li key={step.title}>
-                  <Reveal delay={index * 0.08}>
-                    <h3 className="font-display text-2xl">{step.title}</h3>
-                    <p className="mt-2 max-w-xs text-[16px] leading-relaxed text-muted">{step.text}</p>
-                  </Reveal>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* Privacy */}
-        <section id="privacy" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
-            <h2 className="font-display text-4xl leading-none sm:text-5xl">Your photos stay yours.</h2>
-            <div>
-              <dl className="border-t border-line">
-                {PRIVACY.map((item) => (
-                  <div key={item.title} className="border-b border-line py-5 md:grid md:grid-cols-[1fr_1.4fr] md:gap-8">
-                    <dt className="font-display text-xl">{item.title}</dt>
-                    <dd className="mt-1 text-[16px] leading-relaxed text-muted md:mt-0">{item.text}</dd>
-                  </div>
-                ))}
-              </dl>
-              <Link
-                href="/privacy"
-                className="mt-6 inline-block text-[15px] underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
-              >
-                Read the full privacy page
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Last call to action and footer */}
-        <section className="border-t border-line">
-          <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-5 py-16 lg:px-8 lg:py-24">
-            <h2 className="max-w-2xl font-display text-4xl leading-none sm:text-5xl">
-              Try it with one photo. It takes a minute.
-            </h2>
-            <Button href="/signup" size="lg">
-              Create free account
+        {/* Last call to action */}
+        <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+          <div className="flex flex-col items-start gap-6 rounded-[28px] bg-accent p-8 text-on-accent sm:p-14">
+            <h2 className="max-w-2xl font-display text-4xl leading-none sm:text-6xl">Try it with one photo. It takes a minute.</h2>
+            <Button href="/signup" pill size="lg" className="bg-black text-white hover:opacity-90">
+              Start creating
+              <ArrowRight className="size-5" aria-hidden="true" />
             </Button>
           </div>
-
-          <footer className="border-t border-line">
-            <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-8">
-              <Logo />
-              <div className="flex items-center gap-6">
-                <Link href="/login" className="transition-colors hover:text-ink">
-                  Log in
-                </Link>
-                <Link href="/signup" className="transition-colors hover:text-ink">
-                  Create account
-                </Link>
-                <Link href="/privacy" className="transition-colors hover:text-ink">
-                  Privacy
-                </Link>
-              </div>
-              <p>© {new Date().getFullYear()} StyleScan AI</p>
-            </div>
-          </footer>
         </section>
       </main>
+
+      <SiteFooter />
+      <ActionBar />
     </>
   );
 }

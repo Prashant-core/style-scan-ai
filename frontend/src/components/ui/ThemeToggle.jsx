@@ -1,49 +1,16 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/utils/theme";
 
-const KEY = "stylescan-theme";
 const ORDER = ["auto", "light", "dark"];
 const ICONS = { auto: Monitor, light: Sun, dark: Moon };
 const NAMES = { auto: "Same as device", light: "Light", dark: "Dark" };
 
-const listeners = new Set();
-
-function read() {
-  try {
-    const saved = localStorage.getItem(KEY);
-    return saved === "light" || saved === "dark" ? saved : "auto";
-  } catch {
-    return "auto";
-  }
-}
-
-function subscribe(callback) {
-  listeners.add(callback);
-  window.addEventListener("storage", callback);
-  return () => {
-    listeners.delete(callback);
-    window.removeEventListener("storage", callback);
-  };
-}
-
-function choose(value) {
-  try {
-    if (value === "auto") localStorage.removeItem(KEY);
-    else localStorage.setItem(KEY, value);
-  } catch {
-    // Saving is a bonus. The theme still changes for this visit.
-  }
-  if (value === "auto") document.documentElement.removeAttribute("data-theme");
-  else document.documentElement.setAttribute("data-theme", value);
-  listeners.forEach((callback) => callback());
-}
-
-// One button that goes through: same as device, light, dark.
+// One small button that goes through: same as device, light, dark.
 export default function ThemeToggle({ className = "" }) {
-  const theme = useSyncExternalStore(subscribe, read, () => "auto");
+  const [theme, choose] = useTheme();
   const Icon = ICONS[theme];
   const next = ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length];
 

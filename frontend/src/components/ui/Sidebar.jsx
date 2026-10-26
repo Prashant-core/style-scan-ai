@@ -10,7 +10,7 @@ import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { ACCOUNT_ITEMS, FEATURES, HOME_ITEM } from "@/utils/features";
 
-const rowStyle = "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors";
+const rowStyle = "group/tool relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors";
 
 function NavItem({ item, active, onNavigate }) {
   const Icon = item.icon;

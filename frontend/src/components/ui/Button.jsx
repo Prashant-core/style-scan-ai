@@ -14,6 +14,8 @@ const variants = {
   light: "bg-paper text-ink hover:-translate-y-px hover:opacity-90",
   danger: "bg-danger text-paper hover:-translate-y-px hover:opacity-90",
   ghost: "text-ink hover:bg-ink/5",
+  accent: "bg-accent text-on-accent hover:-translate-y-px hover:brightness-105",
+  outline: "border border-ink/40 text-ink hover:-translate-y-px hover:border-ink",
 };
 
 export default function Button({
@@ -22,13 +24,14 @@ export default function Button({
   size = "md",
   loading = false,
   disabled = false,
+  pill = false,
   type = "button",
   className = "",
   children,
   ...props
 }) {
   const classes = [
-    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60",
+    `inline-flex items-center justify-center gap-2 ${pill ? "rounded-full" : "rounded-lg"} font-medium transition duration-200 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60`,
     variants[variant],
     sizes[size],
     className,

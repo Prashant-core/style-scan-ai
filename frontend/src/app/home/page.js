@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import PrivateImage from "@/components/features/PrivateImage";
 import AppShell from "@/components/layout/AppShell";
-import Card from "@/components/ui/Card";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/utils/api";
 import { FEATURES } from "@/utils/features";
@@ -17,51 +17,70 @@ function getGreeting() {
   return "Good evening";
 }
 
-function formatDate(value) {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
+// The tools are shown in two groups
+const GROUPS = [
+  { title: "Photo tools", hrefs: ["/editor", "/enhance", "/portrait", "/gallery"] },
+  { title: "Know your look", hrefs: ["/face-analysis", "/skin-tracker", "/assistant", "/trial-room"] },
+];
 
-function ToolRow({ item }) {
-  const Icon = item.icon;
-  const live = item.status === "live";
+// Cards come in one after the other
+const list = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } };
+const item = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+};
 
-  const content = (
+function ToolCard({ tool }) {
+  const Icon = tool.icon;
+  const live = tool.status === "live";
+
+  const body = (
     <>
-      <Icon className="mt-1 size-6 shrink-0 text-ink" aria-hidden="true" />
-      <div className="min-w-0 flex-1">
-        <h3 className="font-display text-2xl font-semibold tracking-tight">{item.label}</h3>
-        <p className="mt-1 text-muted">{item.summary}</p>
+      <div className="flex items-start justify-between">
+        <span
+          className={`grid size-11 place-items-center rounded-lg border border-line bg-paper text-ink transition-colors duration-300 ${
+            live ? "group-hover/tool:border-ink group-hover/tool:bg-ink group-hover/tool:text-paper" : "text-muted"
+          }`}
+        >
+          <Icon className="size-[22px]" />
+        </span>
+        {live ? (
+          <ArrowUpRight
+            className="size-5 text-muted transition-all duration-300 group-hover/tool:-translate-y-0.5 group-hover/tool:translate-x-0.5 group-hover/tool:text-ink"
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted">Soon</span>
+        )}
       </div>
-      {live ? (
-        <ArrowUpRight
-          className="mt-1.5 size-5 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
-      ) : (
-        <span className="mt-1.5 shrink-0 text-sm text-muted">Coming soon</span>
-      )}
+      <div>
+        <h3 className="font-display text-lg sm:text-xl">{tool.label}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted sm:text-[14px]">{tool.summary}</p>
+      </div>
     </>
   );
 
-  const rowStyle = "flex items-start gap-4 border-b border-line py-6 md:px-3";
+  const base = "group/tool flex h-full flex-col justify-between gap-5 rounded-xl border border-line bg-surface p-4 sm:gap-6 sm:p-5";
 
-  if (live) {
-    return (
-      <Link href={item.href} className={`group ${rowStyle} transition-colors hover:bg-surface`}>
-        {content}
-      </Link>
-    );
-  }
-  return <div className={`${rowStyle} text-ink/80`}>{content}</div>;
+  return (
+    <motion.li variants={item}>
+      {live ? (
+        <Link
+          href={tool.href}
+          className={`${base} transition duration-300 hover:-translate-y-0.5 hover:border-ink hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.35)]`}
+        >
+          {body}
+        </Link>
+      ) : (
+        <div className={`${base} opacity-70`}>{body}</div>
+      )}
+    </motion.li>
+  );
 }
 
 export default function HomePage() {
   const { user } = useAuth();
+  const reduce = useReducedMotion();
   const firstName = user?.full_name?.split(" ")[0];
   const [tip, setTip] = useState(null);
   const [recent, setRecent] = useState([]); // the latest saved edits
@@ -90,62 +109,70 @@ export default function HomePage() {
     <>
       <title>Home | StyleScan AI</title>
       <AppShell
+        wide
         title={firstName ? `${getGreeting()}, ${firstName}.` : "Home"}
         description="Pick a tool to get started."
       >
-        <div className="grid gap-12 lg:grid-cols-[1fr_300px]">
-          <div className="border-t border-ink">
-            {FEATURES.map((item) => (
-              <ToolRow key={item.href} item={item} />
-            ))}
-          </div>
+        <div className="space-y-12">
+          {GROUPS.map((group) => (
+            <section key={group.title} aria-labelledby={`group-${group.hrefs[0].slice(1)}`}>
+              <h2
+                id={`group-${group.hrefs[0].slice(1)}`}
+                className="mb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted"
+              >
+                {group.title}
+              </h2>
+              <motion.ul
+                className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"
+                variants={list}
+                initial={reduce ? "show" : "hidden"}
+                animate="show"
+              >
+                {group.hrefs.map((href) => (
+                  <ToolCard key={href} tool={FEATURES.find((tool) => tool.href === href)} />
+                ))}
+              </motion.ul>
+            </section>
+          ))}
 
-          <aside className="space-y-6">
-            {tip && (
-              <Card className="bg-tape/25">
-                <h2 className="font-display text-2xl font-semibold tracking-tight">Tip of the day</h2>
-                <p className="mt-3 text-[15px] leading-relaxed">{tip}</p>
-              </Card>
-            )}
-            {recent.length > 0 && (
-              <Card>
-                <h2 className="font-display text-2xl font-semibold tracking-tight">Recent edits</h2>
-                <ul className="mt-4 grid grid-cols-2 gap-2">
-                  {recent.map((item) => (
-                    <li key={item.id}>
-                      <Link href="/gallery" aria-label="Open your gallery">
-                        <PrivateImage imageId={item.image_id} alt="A saved edit" className="aspect-square w-full rounded-lg object-cover" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/gallery" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">
-                  Open my gallery
-                </Link>
-              </Card>
-            )}
-            <Card>
-              <h2 className="font-display text-2xl font-semibold tracking-tight">Your account</h2>
-              <dl className="mt-5 space-y-4 text-[15px]">
-                <div>
-                  <dt className="text-muted">Name</dt>
-                  <dd className="font-medium">{user?.full_name}</dd>
+          {(tip || recent.length > 0) && (
+            <motion.section
+              className={`grid gap-4 ${tip && recent.length > 0 ? "lg:grid-cols-[1.2fr_1fr]" : ""}`}
+              initial={reduce ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {tip && (
+                <div className="rounded-xl border border-line bg-surface p-6">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Tip of the day</p>
+                  <p className="mt-3 max-w-xl font-display text-2xl leading-snug">{tip}</p>
                 </div>
-                <div>
-                  <dt className="text-muted">Username</dt>
-                  <dd className="font-medium">@{user?.username}</dd>
+              )}
+              {recent.length > 0 && (
+                <div className="rounded-xl border border-line bg-surface p-6">
+                  <div className="flex items-baseline justify-between">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Recent edits</p>
+                    <Link href="/gallery" className="text-sm underline decoration-line underline-offset-4 hover:decoration-ink">
+                      Open gallery
+                    </Link>
+                  </div>
+                  <ul className="mt-4 grid grid-cols-4 gap-2">
+                    {recent.map((edit) => (
+                      <li key={edit.id}>
+                        <Link href="/gallery" aria-label="Open your gallery" className="block overflow-hidden rounded-lg">
+                          <PrivateImage
+                            imageId={edit.image_id}
+                            alt="A saved edit"
+                            className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div>
-                  <dt className="text-muted">Email</dt>
-                  <dd className="break-all font-medium">{user?.email}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Member since</dt>
-                  <dd className="font-medium">{formatDate(user?.created_at)}</dd>
-                </div>
-              </dl>
-            </Card>
-          </aside>
+              )}
+            </motion.section>
+          )}
         </div>
       </AppShell>
     </>

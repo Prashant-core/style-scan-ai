@@ -1,54 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import { Menu } from "lucide-react";
-import Logo from "@/components/ui/Logo";
+import { useSidebarCollapsed } from "@/utils/sidebar";
 import Sidebar from "@/components/ui/Sidebar";
-import ThemeSwitch from "@/components/ui/ThemeSwitch";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import BottomTabs from "./BottomTabs";
 import ProtectedRoute from "./ProtectedRoute";
+import TopBar from "./TopBar";
 
-// The frame for every page after login: sidebar, mobile top bar and page heading.
-// The light / dark switch sits at the top right of every page (in the top bar on phones).
+// The frame for every page after login: left menu, top bar and (on phones) a bottom tab bar.
 // Pass wide for pages that need more room, like the photo editor.
-export default function AppShell({ title, description, wide = false, children }) {
+// Pass bare to skip the page heading and the width limit (the home dashboard does this).
+export default function AppShell({ title, description, wide = false, bare = false, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed] = useSidebarCollapsed();
 
   return (
     <ProtectedRoute>
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-paper/90 px-5 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
-          <Logo href="/home" />
-          <div className="-mr-2 flex items-center gap-1">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-label="Open menu"
-              className="flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-ink/5"
-            >
-              <Menu className="size-5" />
-            </button>
-          </div>
-        </header>
+      <div className={`transition-[padding] duration-300 ${collapsed ? "lg:pl-[76px]" : "lg:pl-64"}`}>
+        <TopBar onMenu={() => setMenuOpen(true)} />
 
-        <main className={`mx-auto w-full px-5 py-8 lg:px-10 lg:py-12 ${wide ? "max-w-7xl" : "max-w-5xl"}`}>
-          <div className="mb-10 flex items-start justify-between gap-6">
-            {title && (
-              <div className="max-w-2xl">
-                <h1 className="font-display text-4xl leading-none sm:text-5xl">{title}</h1>
-                {description && <p className="mt-3 text-lg text-muted">{description}</p>}
-              </div>
-            )}
-            <div className="ml-auto hidden shrink-0 lg:block">
-              <ThemeSwitch />
+        <main
+          className={`mx-auto w-full px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-8 ${
+            bare ? "max-w-[1400px]" : wide ? "max-w-7xl" : "max-w-5xl"
+          }`}
+        >
+          {title && (
+            <div className="mb-10 max-w-2xl">
+              <h1 className="font-display text-4xl leading-none sm:text-5xl">{title}</h1>
+              {description && <p className="mt-3 text-lg text-muted">{description}</p>}
             </div>
-          </div>
+          )}
           {children}
         </main>
       </div>
+
+      <BottomTabs onMore={() => setMenuOpen(true)} />
     </ProtectedRoute>
   );
 }

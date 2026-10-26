@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, Aperture, Crop, Lightbulb, Maximize2, ScanFace, Sparkles, Type } from "lucide-react";
+import ToolGrid from "@/components/dashboard/ToolGrid";
 import PrivateImage from "@/components/features/PrivateImage";
+import Carousel from "@/components/home/Carousel";
+import MediaCard from "@/components/home/MediaCard";
+import { WALL_ITEMS, PhotoTile } from "@/components/home/PhotoWall";
 import AppShell from "@/components/layout/AppShell";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/utils/api";
-import { FEATURES } from "@/utils/features";
+
+const W = "/wall/";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -17,88 +22,48 @@ function getGreeting() {
   return "Good evening";
 }
 
-// The tools are shown in two groups
-const GROUPS = [
-  { title: "Photo tools", hrefs: ["/editor", "/enhance", "/portrait", "/gallery"] },
-  { title: "Know your look", hrefs: ["/face-analysis", "/skin-tracker", "/assistant", "/trial-room"] },
+// The big cards at the top
+const FEATURED = [
+  { href: "/editor", title: "Fix the light in one tap", tag: "Auto-fix", before: W + "autofix-before.jpg", after: W + "autofix-after.jpg" },
+  { href: "/enhance", title: "Make a small photo sharp and twice as big", tag: "Enhancer", before: W + "enhance-before.jpg", after: W + "enhance-after.jpg" },
+  { href: "/portrait", title: "Blur or remove the background", tag: "Portrait", before: W + "blur-before.jpg", after: W + "blur-after.jpg" },
+  { href: "/face-analysis", title: "Find your face shape", tag: "Face analysis", after: W + "face-shape.jpg" },
 ];
 
-// Cards come in one after the other
-const list = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } };
-const item = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
-};
-
-function ToolCard({ tool }) {
-  const Icon = tool.icon;
-  const live = tool.status === "live";
-
-  const body = (
-    <>
-      <div className="flex items-start justify-between">
-        <span
-          className={`grid size-11 place-items-center rounded-lg border border-line bg-paper text-ink transition-colors duration-300 ${
-            live ? "group-hover/tool:border-ink group-hover/tool:bg-ink group-hover/tool:text-paper" : "text-muted"
-          }`}
-        >
-          <Icon className="size-[22px]" />
-        </span>
-        {live ? (
-          <ArrowUpRight
-            className="size-5 text-muted transition-all duration-300 group-hover/tool:-translate-y-0.5 group-hover/tool:translate-x-0.5 group-hover/tool:text-ink"
-            aria-hidden="true"
-          />
-        ) : (
-          <span className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted">Soon</span>
-        )}
-      </div>
-      <div>
-        <h3 className="font-display text-lg sm:text-xl">{tool.label}</h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted sm:text-[14px]">{tool.summary}</p>
-      </div>
-    </>
-  );
-
-  const base = "group/tool flex h-full flex-col justify-between gap-5 rounded-xl border border-line bg-surface p-4 sm:gap-6 sm:p-5";
-
-  return (
-    <motion.li variants={item}>
-      {live ? (
-        <Link
-          href={tool.href}
-          className={`${base} transition duration-300 hover:-translate-y-0.5 hover:border-ink hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.35)]`}
-        >
-          {body}
-        </Link>
-      ) : (
-        <div className={`${base} opacity-70`}>{body}</div>
-      )}
-    </motion.li>
-  );
-}
+// Small round-cornered shortcuts
+const QUICK = [
+  { href: "/editor", label: "Crop a photo", icon: Crop },
+  { href: "/editor", label: "Add text", icon: Type },
+  { href: "/editor", label: "Fix the light", icon: Sparkles },
+  { href: "/portrait", label: "Blur the background", icon: Aperture },
+  { href: "/enhance", label: "Make it bigger", icon: Maximize2 },
+  { href: "/face-analysis", label: "Find my face shape", icon: ScanFace },
+];
 
 export default function HomePage() {
   const { user } = useAuth();
-  const reduce = useReducedMotion();
   const firstName = user?.full_name?.split(" ")[0];
   const [tip, setTip] = useState(null);
-  const [recent, setRecent] = useState([]); // the latest saved edits
+  const [recent, setRecent] = useState(null); // null while loading, then a list
 
   // The daily tip is a bonus. If it cannot load, the page works without it.
   useEffect(() => {
+    let active = true;
     api
       .get("/api/tips/today")
-      .then((data) => setTip(data.tip))
-      .catch(() => setTip(null));
+      .then((data) => active && setTip(data.tip))
+      .catch(() => active && setTip(null));
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // Also a bonus. Without it, the "Recent edits" box is simply not shown.
+  // Also a bonus. If it fails, the box shows the empty message.
   useEffect(() => {
     let active = true;
     api
       .get("/api/history?scan_type=edit")
-      .then((data) => active && setRecent(data.slice(0, 4)))
+      .then((data) => active && setRecent(data.slice(0, 6)))
       .catch(() => active && setRecent([]));
     return () => {
       active = false;
@@ -108,71 +73,113 @@ export default function HomePage() {
   return (
     <>
       <title>Home | StyleScan AI</title>
-      <AppShell
-        wide
-        title={firstName ? `${getGreeting()}, ${firstName}.` : "Home"}
-        description="Pick a tool to get started."
-      >
-        <div className="space-y-12">
-          {GROUPS.map((group) => (
-            <section key={group.title} aria-labelledby={`group-${group.hrefs[0].slice(1)}`}>
-              <h2
-                id={`group-${group.hrefs[0].slice(1)}`}
-                className="mb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted"
-              >
-                {group.title}
-              </h2>
-              <motion.ul
-                className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"
-                variants={list}
-                initial={reduce ? "show" : "hidden"}
-                animate="show"
-              >
-                {group.hrefs.map((href) => (
-                  <ToolCard key={href} tool={FEATURES.find((tool) => tool.href === href)} />
-                ))}
-              </motion.ul>
-            </section>
-          ))}
+      <AppShell bare>
+        <div className="space-y-12 lg:space-y-14">
+          <section aria-labelledby="featured-title">
+            <h1 id="featured-title" className="mb-4 font-display text-3xl sm:text-4xl">
+              {firstName ? `${getGreeting()}, ${firstName}.` : "Welcome back."}
+            </h1>
+            <Carousel label="Try these first">
+              {FEATURED.map((card) => (
+                <MediaCard key={card.title} {...card} size="w-[290px] aspect-[16/10] sm:w-[400px] xl:w-[460px]" />
+              ))}
+            </Carousel>
+          </section>
 
-          {(tip || recent.length > 0) && (
-            <motion.section
-              className={`grid gap-4 ${tip && recent.length > 0 ? "lg:grid-cols-[1.2fr_1fr]" : ""}`}
-              initial={reduce ? false : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {tip && (
-                <div className="rounded-xl border border-line bg-surface p-6">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Tip of the day</p>
-                  <p className="mt-3 max-w-xl font-display text-2xl leading-snug">{tip}</p>
-                </div>
-              )}
-              {recent.length > 0 && (
-                <div className="rounded-xl border border-line bg-surface p-6">
-                  <div className="flex items-baseline justify-between">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted">Recent edits</p>
-                    <Link href="/gallery" className="text-sm underline decoration-line underline-offset-4 hover:decoration-ink">
-                      Open gallery
+          <section aria-labelledby="quick-title">
+            <h2 id="quick-title" className="mb-4 font-display text-2xl sm:text-3xl">
+              Quick starts
+            </h2>
+            <ul className="flex flex-wrap gap-2.5">
+              {QUICK.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="group/chip inline-flex items-center gap-2.5 rounded-full border border-line bg-surface py-2.5 pl-3.5 pr-5 text-[15px] font-medium transition hover:-translate-y-0.5 hover:border-ink"
+                    >
+                      <Icon className="size-[18px] transition-transform duration-300 group-hover/chip:scale-110" aria-hidden="true" />
+                      {item.label}
                     </Link>
-                  </div>
-                  <ul className="mt-4 grid grid-cols-4 gap-2">
-                    {recent.map((edit) => (
-                      <li key={edit.id}>
-                        <Link href="/gallery" aria-label="Open your gallery" className="block overflow-hidden rounded-lg">
-                          <PrivateImage
-                            imageId={edit.image_id}
-                            alt="A saved edit"
-                            className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105"
-                          />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <section aria-labelledby="tools-title">
+            <h2 id="tools-title" className="mb-4 font-display text-2xl sm:text-3xl">
+              All tools
+            </h2>
+            <ToolGrid />
+          </section>
+
+          <section aria-labelledby="recent-title" className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+            <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 id="recent-title" className="font-display text-2xl">
+                  Recent edits
+                </h2>
+                <Link href="/gallery" className="text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
+                  Open gallery
+                </Link>
+              </div>
+
+              {recent === null && (
+                <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6" aria-hidden="true">
+                  {[0, 1, 2, 3, 4, 5].map((n) => (
+                    <div key={n} className="aspect-square animate-pulse rounded-lg bg-line" />
+                  ))}
                 </div>
               )}
-            </motion.section>
-          )}
+
+              {recent && recent.length > 0 && (
+                <ul className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {recent.map((edit) => (
+                    <li key={edit.id}>
+                      <Link href="/gallery" aria-label="Open your gallery" className="block overflow-hidden rounded-lg">
+                        <PrivateImage
+                          imageId={edit.image_id}
+                          alt="A saved edit"
+                          className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {recent && recent.length === 0 && (
+                <div className="mt-5 flex flex-col items-start gap-4 rounded-xl border border-dashed border-line p-6">
+                  <p className="text-[15px] text-muted">No saved edits yet. Open a photo, edit it and press Save to see it here.</p>
+                  <Button href="/editor" variant="accent" pill size="sm">
+                    Open a photo
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {tip && (
+              <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
+                  <Lightbulb className="size-4" aria-hidden="true" /> Tip of the day
+                </p>
+                <p className="mt-4 font-display text-2xl leading-snug">{tip}</p>
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="wall-title">
+            <h2 id="wall-title" className="mb-4 font-display text-2xl sm:text-3xl">
+              See what the tools can do
+            </h2>
+            <div className="pw-wall">
+              {WALL_ITEMS.map((item) => (
+                <PhotoTile key={item.title} item={item} />
+              ))}
+            </div>
+          </section>
         </div>
       </AppShell>
     </>

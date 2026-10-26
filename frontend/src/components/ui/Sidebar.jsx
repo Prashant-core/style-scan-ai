@@ -2,27 +2,34 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, X } from "lucide-react";
-import Logo from "./Logo";
-import ThemeToggle from "./ThemeToggle";
-import { useAuth } from "@/context/AuthContext";
+import { ChevronLeft, ChevronRight, Lock, Plus, X } from "lucide-react";
+import Logo, { LogoMark } from "./Logo";
 import { ACCOUNT_ITEMS, FEATURES, HOME_ITEM } from "@/utils/features";
+import { useSidebarCollapsed } from "@/utils/sidebar";
 
-const rowStyle = "group/tool relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors";
-
-function NavItem({ item, active, onNavigate }) {
+function NavItem({ item, active, onNavigate, collapsed }) {
   const Icon = item.icon;
+  const soon = item.status === "soon";
+  const row = `group/tool relative flex items-center rounded-xl text-[15px] transition-colors ${
+    collapsed ? "size-11 justify-center" : "gap-3 px-3 py-2.5"
+  }`;
 
-  if (item.status === "soon") {
+  const inner = (
+    <>
+      <Icon className="size-[20px] shrink-0 transition-transform duration-300 group-hover/tool:scale-110" aria-hidden="true" />
+      {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && soon && (
+        <span className="ml-auto rounded-full border border-line px-2 py-0.5 text-xs text-muted">Soon</span>
+      )}
+    </>
+  );
+
+  if (soon) {
     return (
-      <div className={`${rowStyle} cursor-default text-muted/70`} aria-disabled="true">
-        <Icon className="size-[18px]" aria-hidden="true" />
-        <span>{item.label}</span>
-        <span className="ml-auto rounded-full border border-line px-2 py-0.5 text-xs text-muted">
-          Soon
-        </span>
+      <div className={`${row} cursor-default text-muted/70`} aria-disabled="true" title={`${item.label} (soon)`}>
+        {inner}
       </div>
     );
   }
@@ -32,36 +39,30 @@ function NavItem({ item, active, onNavigate }) {
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`${rowStyle} ${
-        active ? "bg-tape-soft font-semibold text-ink" : "text-muted hover:bg-ink/5 hover:text-ink"
-      }`}
+      aria-label={collapsed ? item.label : undefined}
+      title={collapsed ? item.label : undefined}
+      className={`${row} ${active ? "bg-tape-soft font-semibold text-ink" : "text-muted hover:bg-ink/5 hover:text-ink"}`}
     >
-      {active && (
-        <span className="absolute inset-y-2 left-0 w-[3px] rounded-full bg-tape" aria-hidden="true" />
-      )}
-      <Icon className="size-[18px]" aria-hidden="true" />
-      <span>{item.label}</span>
+      {inner}
     </Link>
   );
 }
 
-function SidebarBody({ onNavigate, onClose }) {
+// The content of the menu. "collapsed" shows icons only (computer only).
+function SidebarBody({ collapsed = false, onNavigate, onClose, onToggle }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuth();
-
   const isActive = (href) => pathname === href || pathname.startsWith(`${href}/`);
 
-  function handleLogout() {
-    logout();
-    onNavigate?.();
-    router.replace("/");
-  }
-
   return (
-    <div className="flex h-full flex-col px-4 py-5">
-      <div className="flex items-center justify-between px-2">
-        <Logo href="/home" />
+    <div className={`flex h-full flex-col py-5 ${collapsed ? "items-center px-3" : "px-4"}`}>
+      <div className={`flex w-full items-center ${collapsed ? "justify-center" : "justify-between px-2"}`}>
+        {collapsed ? (
+          <Link href="/home" aria-label="StyleScan home">
+            <LogoMark className="size-8" />
+          </Link>
+        ) : (
+          <Logo href="/home" />
+        )}
         {onClose && (
           <button
             type="button"
@@ -74,47 +75,61 @@ function SidebarBody({ onNavigate, onClose }) {
         )}
       </div>
 
-      <nav className="mt-8 flex flex-1 flex-col gap-1 overflow-y-auto" aria-label="App">
-        <NavItem item={HOME_ITEM} active={isActive(HOME_ITEM.href)} onNavigate={onNavigate} />
+      {/* The main button, like "Start new design" */}
+      <Link
+        href="/editor"
+        onClick={onNavigate}
+        aria-label="Open a photo"
+        title="Open a photo"
+        className={`mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-accent font-medium text-on-accent transition hover:-translate-y-px hover:brightness-105 active:scale-[0.98] ${
+          collapsed ? "size-11" : "h-12 w-full text-[15px]"
+        }`}
+      >
+        <Plus className="size-5" aria-hidden="true" />
+        {!collapsed && "Open a photo"}
+      </Link>
+
+      <nav className={`mt-6 flex w-full flex-1 flex-col gap-1 overflow-y-auto ${collapsed ? "items-center" : ""}`} aria-label="App">
+        <NavItem item={HOME_ITEM} active={isActive(HOME_ITEM.href)} onNavigate={onNavigate} collapsed={collapsed} />
         {FEATURES.map((item) => (
-          <NavItem key={item.href} item={item} active={isActive(item.href)} onNavigate={onNavigate} />
+          <NavItem key={item.href} item={item} active={isActive(item.href)} onNavigate={onNavigate} collapsed={collapsed} />
         ))}
-
-        <div className="my-3 border-t border-line" />
-
+        <div className={`my-3 border-t border-line ${collapsed ? "w-8" : "w-full"}`} />
         {ACCOUNT_ITEMS.map((item) => (
-          <NavItem key={item.href} item={item} active={isActive(item.href)} onNavigate={onNavigate} />
+          <NavItem key={item.href} item={item} active={isActive(item.href)} onNavigate={onNavigate} collapsed={collapsed} />
         ))}
       </nav>
 
-      <div className="mt-4 flex items-center gap-3 border-t border-line px-2 pt-4">
-        <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white"
-          aria-hidden="true"
+      {!collapsed && (
+        <Link
+          href="/privacy"
+          onClick={onNavigate}
+          className="mt-4 flex items-start gap-3 rounded-xl border border-line p-3 text-[13px] leading-snug text-muted transition-colors hover:border-ink"
         >
-          {user?.full_name?.charAt(0).toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-ink">{user?.full_name}</p>
-          <p className="truncate text-sm text-muted">@{user?.username}</p>
-        </div>
-        <ThemeToggle />
+          <Lock className="mt-0.5 size-4 shrink-0 text-ink" aria-hidden="true" />
+          <span>Your photos are private to your account. You can delete them any time.</span>
+        </Link>
+      )}
+
+      {onToggle && (
         <button
           type="button"
-          onClick={handleLogout}
-          aria-label="Log out"
-          title="Log out"
-          className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-ink/5 hover:text-ink"
+          onClick={onToggle}
+          aria-label={collapsed ? "Expand the menu" : "Shrink the menu"}
+          title={collapsed ? "Expand the menu" : "Shrink the menu"}
+          className="mt-4 flex size-9 items-center justify-center self-end rounded-full border border-line text-muted transition-colors hover:border-ink hover:text-ink"
         >
-          <LogOut className="size-[18px]" />
+          {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
         </button>
-      </div>
+      )}
     </div>
   );
 }
 
 export default function Sidebar({ open, onClose }) {
-  // Close the mobile menu with the Escape key
+  const [collapsed, setCollapsed] = useSidebarCollapsed();
+
+  // Close the phone menu with the Escape key
   useEffect(() => {
     if (!open) return;
     const onKey = (event) => {
@@ -126,8 +141,12 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-paper lg:block">
-        <SidebarBody />
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 hidden border-r border-line bg-paper transition-[width] duration-300 lg:block ${
+          collapsed ? "w-[76px]" : "w-64"
+        }`}
+      >
+        <SidebarBody collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       </aside>
 
       <AnimatePresence>

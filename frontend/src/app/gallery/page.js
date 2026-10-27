@@ -7,6 +7,8 @@ import { Download, PencilRuler, Trash2 } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
+import { GalleryIcon } from "@/components/ui/ToolIcons";
 import PrivateImage from "@/components/features/PrivateImage";
 import { api, fetchBlob } from "@/utils/api";
 import { setHandoff } from "@/utils/handoff";
@@ -88,19 +90,22 @@ export default function GalleryPage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="max-w-xl rounded-xl border border-line bg-surface p-8">
-            <h2 className="font-display text-3xl font-semibold tracking-tight">Nothing saved yet</h2>
-            <p className="mt-2 text-muted">
-              After you edit, enhance or retouch a photo, press <strong>Save to my gallery</strong>. It will appear
-              here.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Button href="/editor">Open the photo editor</Button>
-              <Button href="/portrait" variant="secondary">
-                Portrait tools
-              </Button>
-            </div>
-          </div>
+          <EmptyState
+            icon={GalleryIcon}
+            title="Nothing saved yet"
+            actions={
+              <>
+                <Button href="/editor" variant="accent" pill>
+                  Open the photo editor
+                </Button>
+                <Button href="/portrait" variant="outline" pill>
+                  Portrait tools
+                </Button>
+              </>
+            }
+          >
+            After you edit, enhance or retouch a photo, press <strong>Save to my gallery</strong>. It will appear here.
+          </EmptyState>
         ) : (
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.map((item) => (

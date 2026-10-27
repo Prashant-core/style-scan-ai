@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Camera, ImagePlus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import CameraCapture from "@/components/features/CameraCapture";
@@ -13,6 +14,7 @@ export default function UploadBox({ onSelect, disabled = false }) {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [cameraOpen, setCameraOpen] = useState(false);
+  const reduce = useReducedMotion();
 
   function handleFile(file) {
     if (!file) return;
@@ -56,21 +58,27 @@ export default function UploadBox({ onSelect, disabled = false }) {
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        className={`flex flex-col items-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors ${
-          dragging ? "border-ink bg-tape/15" : "border-ink/25 bg-surface"
+        className={`flex flex-col items-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors sm:py-14 ${
+          dragging ? "border-accent bg-accent/15" : "border-ink/25 bg-surface"
         }`}
       >
-        <ImagePlus className="size-10 text-ink" aria-hidden="true" />
-        <p className="mt-4 font-display text-3xl font-semibold tracking-tight">Add your photo</p>
+        <motion.span
+          className="grid size-16 place-items-center rounded-2xl border border-line bg-paper"
+          animate={reduce ? undefined : { y: dragging ? -8 : [0, -5, 0] }}
+          transition={dragging ? { duration: 0.2 } : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ImagePlus className="size-8 text-ink" aria-hidden="true" />
+        </motion.span>
+        <p className="mt-5 font-display text-2xl sm:text-3xl">{dragging ? "Drop it here" : "Add your photo"}</p>
         <p className="mt-2 max-w-xs text-muted">
           Drop a photo here, choose one from your device, or take one now. JPG, PNG or WebP, up to 10 MB.
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Button onClick={() => chooseRef.current?.click()} disabled={disabled}>
+          <Button variant="accent" pill onClick={() => chooseRef.current?.click()} disabled={disabled}>
             Choose a photo
           </Button>
-          <Button variant="secondary" onClick={openCamera} disabled={disabled}>
+          <Button variant="outline" pill onClick={openCamera} disabled={disabled}>
             <Camera className="size-4" aria-hidden="true" />
             Use camera
           </Button>

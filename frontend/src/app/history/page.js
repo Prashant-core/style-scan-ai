@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
+import { HistoryIcon } from "@/components/ui/ToolIcons";
 import PrivateImage from "@/components/features/PrivateImage";
 import { api } from "@/utils/api";
 import { formatDate, friendlyError } from "@/utils/photo";
@@ -91,7 +93,9 @@ export default function HistoryPage() {
         {loading ? (
           <div className="h-40 animate-pulse rounded-xl bg-line" aria-hidden="true" />
         ) : shown.length === 0 ? (
-          <p className="text-muted">Nothing here yet.</p>
+          <EmptyState icon={HistoryIcon} title="Nothing here yet" actions={<Button href="/home" variant="accent" pill>Go to home</Button>}>
+            Your edits and scans will be listed here after you use a tool.
+          </EmptyState>
         ) : (
           <ul className="border-t border-ink">
             {shown.map((item) => (

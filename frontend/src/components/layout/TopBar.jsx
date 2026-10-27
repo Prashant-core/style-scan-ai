@@ -167,26 +167,29 @@ function ProfileMenu() {
 // On a phone: logo, theme, profile and a menu button.
 export default function TopBar({ onMenu }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-paper/90 pt-[env(safe-area-inset-top)] backdrop-blur">
-      <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-10">
-        <Logo href="/home" className="lg:hidden" />
-        <ToolSearch className="hidden max-w-xl flex-1 lg:block" />
-        <div className="ml-auto flex items-center gap-1.5">
-          <ThemeToggle />
-          <ProfileMenu />
-          <button
-            type="button"
-            onClick={onMenu}
-            aria-label="Open menu"
-            className="flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-ink/5 lg:hidden"
-          >
-            <Menu className="size-5" />
-          </button>
+    <>
+      <header className="sticky top-0 z-20 border-b border-line bg-paper/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-10">
+          <Logo href="/home" className="lg:hidden" />
+          <ToolSearch className="hidden max-w-xl flex-1 lg:block" />
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeToggle />
+            <ProfileMenu />
+            <button
+              type="button"
+              onClick={onMenu}
+              aria-label="Open menu"
+              className="flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-ink/5 lg:hidden"
+            >
+              <Menu className="size-5" />
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="px-4 pb-3 sm:px-6 lg:hidden">
+      </header>
+      {/* On a phone the search box sits under the bar and scrolls away, so the bar stays small */}
+      <div className="border-b border-line px-4 py-3 sm:px-6 lg:hidden">
         <ToolSearch />
       </div>
-    </header>
+    </>
   );
 }

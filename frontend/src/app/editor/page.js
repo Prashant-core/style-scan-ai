@@ -224,8 +224,8 @@ export default function EditorPage() {
       <title>Photo editor | StyleScan AI</title>
       <AppShell
         wide
-        title="Photo editor"
-        description="Crop, adjust, add filters and text. Your photo stays on your device while you edit."
+        title={photo ? undefined : "Photo editor"}
+        description={photo ? undefined : "Crop, adjust, add filters and text. Your photo stays on your device while you edit."}
       >
         {error && <Alert className="mb-6">{error}</Alert>}
 
@@ -255,7 +255,7 @@ export default function EditorPage() {
                 title="Undo (Ctrl+Z)"
               >
                 <Undo2 className="size-4" aria-hidden="true" />
-                Undo
+                <span className="hidden sm:inline">Undo</span>
               </Button>
               <Button
                 variant="secondary"
@@ -266,7 +266,7 @@ export default function EditorPage() {
                 title="Redo (Ctrl+Shift+Z)"
               >
                 <Redo2 className="size-4" aria-hidden="true" />
-                Redo
+                <span className="hidden sm:inline">Redo</span>
               </Button>
               <Button
                 variant="ghost"
@@ -293,7 +293,8 @@ export default function EditorPage() {
                 aria-label="Hold to see the original"
               >
                 <Eye className="size-4" aria-hidden="true" />
-                Hold to compare
+                <span className="hidden sm:inline">Hold to compare</span>
+                <span className="sm:hidden">Compare</span>
               </Button>
               <Button variant="secondary" size="sm" onClick={autoFix} disabled={cropping}>
                 <Wand2 className="size-4" aria-hidden="true" />
@@ -310,7 +311,7 @@ export default function EditorPage() {
             </div>
 
             {/* The photo. On a phone it stays at the top while you move the sliders below it. */}
-            <div className="sticky top-14 z-10 -mx-5 bg-paper px-5 pb-2 lg:static lg:col-start-1 lg:row-start-2 lg:mx-0 lg:p-0">
+            <div className="sticky top-16 z-10 -mx-4 bg-paper px-4 pb-2 sm:-mx-6 sm:px-6 lg:static lg:col-start-1 lg:row-start-2 lg:mx-0 lg:p-0">
               <div className="flex items-center justify-center rounded-xl border border-line bg-surface p-2 sm:p-5 lg:min-h-[300px]">
                 <div className="relative w-fit max-w-full">
                   <canvas

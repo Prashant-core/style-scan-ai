@@ -198,8 +198,10 @@ export default function EnhancePage() {
       <title>Photo enhancer | StyleScan AI</title>
       <AppShell
         wide
-        title="Photo enhancer"
-        description="Make a small, soft or noisy photo sharper. The AI runs in your browser, so your photo never leaves your device."
+        title={photo ? undefined : "Photo enhancer"}
+        description={
+          photo ? undefined : "Make a small, soft or noisy photo sharper. The AI runs in your browser, so your photo never leaves your device."
+        }
       >
         {error && <Alert className="mb-6">{error}</Alert>}
 

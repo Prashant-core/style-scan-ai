@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Eye, ImagePlus, PencilRuler, Sparkles } from "lucide-react";
+import { Download, Eye, ImagePlus, PencilRuler, Sparkles, UserRound } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
@@ -210,8 +210,12 @@ export default function PortraitPage() {
       <title>Portrait tools | StyleScan AI</title>
       <AppShell
         wide
-        title="Portrait tools"
-        description="Blur, change or remove the background, and gently smooth skin. It all runs in your browser, so your photo never leaves your device."
+        title={stage === "ready" ? undefined : "Portrait tools"}
+        description={
+          stage === "ready"
+            ? undefined
+            : "Blur, change or remove the background, and gently smooth skin. It all runs in your browser, so your photo never leaves your device."
+        }
       >
         {error && <Alert className="mb-6">{error}</Alert>}
 
@@ -234,7 +238,7 @@ export default function PortraitPage() {
         ) : (
           <div className="grid items-start gap-x-6 gap-y-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             {/* The photo. On a phone it stays at the top while you move the sliders below it. */}
-            <div className="sticky top-14 z-10 -mx-5 bg-paper px-5 pb-2 lg:static lg:mx-0 lg:p-0">
+            <div className="sticky top-16 z-10 -mx-4 bg-paper px-4 pb-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:p-0">
               <div className="flex items-center justify-center rounded-xl border border-line bg-surface p-2 sm:p-5 lg:min-h-[300px]">
                 <canvas
                   ref={canvasRef}

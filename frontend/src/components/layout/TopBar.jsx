@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, History, LogOut, Menu, Search, Settings, ShieldCheck } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import InstallButton from "@/components/pwa/InstallButton";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { FEATURES } from "@/utils/features";
@@ -151,6 +152,7 @@ function ProfileMenu() {
               <Link href="/privacy" onClick={() => setOpen(false)} className={row}>
                 <ShieldCheck className="size-[18px] text-muted" aria-hidden="true" /> Privacy
               </Link>
+              <InstallButton className={`${row} w-full text-left`} />
               <button type="button" onClick={handleLogout} className={`${row} w-full text-left`}>
                 <LogOut className="size-[18px] text-muted" aria-hidden="true" /> Log out
               </button>

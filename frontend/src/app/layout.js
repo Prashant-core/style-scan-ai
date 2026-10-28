@@ -1,13 +1,15 @@
 import "./globals.css";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import PwaRegister from "@/components/pwa/PwaRegister";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
   title: { default: "StyleScan AI", template: "%s" },
   description:
     "Photo tools that run in your browser: edit, sharpen, blur backgrounds, find your face shape and track your skin. Your photos stay private.",
-  icons: { icon: "/logo.svg" },
+  icons: { icon: "/logo.svg", apple: "/icons/apple" },
+  appleWebApp: { capable: true, title: "StyleScan", statusBarStyle: "default" },
 };
 
 // The colour of the phone's top bar follows the theme
@@ -31,6 +33,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen font-sans antialiased">
+        <PwaRegister />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

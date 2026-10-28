@@ -3,6 +3,7 @@ import { ArrowRight, Laptop, Smartphone, Tablet, Download } from "lucide-react";
 import Navbar from "@/components/ui/Navbar";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
+import InstallButton from "@/components/pwa/InstallButton";
 import SiteFooter from "@/components/ui/SiteFooter";
 import ActionBar from "@/components/home/ActionBar";
 import Carousel from "@/components/home/Carousel";
@@ -69,7 +70,7 @@ const SCREENS = [
   { icon: Smartphone, title: "On your phone", text: "Large buttons and sliders you can reach with a thumb." },
   { icon: Tablet, title: "On a tablet", text: "The tools sit beside your photo, so you can see every change." },
   { icon: Laptop, title: "On a computer", text: "Keyboard shortcuts such as Ctrl+Z, plus the full-size photo." },
-  { icon: Download, title: "As an app", text: "Install it on your Android home screen.", soon: true },
+  { icon: Download, title: "As an app", text: "Install it on your Android home screen. It opens full screen, like any other app.", install: true },
 ];
 
 const PRIVACY = [
@@ -195,10 +196,14 @@ export default function IntroPage() {
                 <li key={item.title} className="rounded-[20px] border border-line bg-surface p-6">
                   <div className="flex items-start justify-between">
                     <Icon className="size-9" strokeWidth={1.3} aria-hidden="true" />
-                    {item.soon && <span className="rounded-full border border-line px-2.5 py-0.5 text-xs text-muted">Soon</span>}
                   </div>
                   <h3 className="mt-10 font-display text-2xl">{item.title}</h3>
                   <p className="mt-2 text-[15px] leading-relaxed text-muted">{item.text}</p>
+                  {item.install && (
+                    <div className="mt-4">
+                      <InstallButton className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-[15px] font-medium text-on-accent transition hover:-translate-y-px hover:brightness-105" />
+                    </div>
+                  )}
                 </li>
               );
             })}

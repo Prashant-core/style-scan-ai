@@ -17,6 +17,9 @@ import {
   MODELS,
   blend,
   enhanceImageData,
+  fitToBudget,
+  measureTileMs,
+  tileFor,
   formatDuration,
   plannedSize,
   scaledCopy,
@@ -30,8 +33,6 @@ import { friendlyError } from "@/utils/photo";
 const noSubscription = () => () => {};
 const detectGpu = () => Boolean(navigator.gpu);
 const serverGuess = () => false;
-
-const megabytes = (bytes) => (bytes / 1024 / 1024).toFixed(1);
 
 export default function EnhancePage() {
   const router = useRouter();
@@ -88,40 +89,47 @@ export default function EnhancePage() {
     setResult(null);
     setStrength(100);
 
-    // The photo that goes to the model, the plain upscale to compare with, and the empty result
-    const source = scaledCopy(photo.full, plan.input.w, plan.input.h);
-    const sourceData = source.getContext("2d").getImageData(0, 0, plan.input.w, plan.input.h);
-    const before = scaledCopy(source, plan.output.w, plan.output.h);
-    const baseData = before.getContext("2d").getImageData(0, 0, plan.output.w, plan.output.h);
-    const after = document.createElement("canvas");
-    after.width = plan.output.w;
-    after.height = plan.output.h;
-    const afterContext = after.getContext("2d", { willReadFrequently: true });
-    afterContext.putImageData(baseData, 0, 0);
-    // Pieces that are not finished yet show the plain upscale
-    const enhancedData = new ImageData(new Uint8ClampedArray(baseData.data), baseData.width, baseData.height);
-    dataRef.current = { base: baseData, enhanced: enhancedData, context: afterContext };
-
     const enhancer = new Enhancer();
     enhancerRef.current = enhancer;
     setPhase("loading");
-    setProgress({ text: "Getting the AI model ready...", percent: 0, etaMs: null });
+    setProgress({ text: "Getting ready...", percent: 0, etaMs: null });
 
     try {
-      // The model is downloaded the first time. We add up all its files for one progress bar.
+      // The model may need to be fetched the first time. The person only sees "Getting ready".
       const files = {};
       const used = await enhancer.load(model, (info) => {
         files[info.file] = info;
         const list = Object.values(files);
         const loaded = list.reduce((sum, item) => sum + item.loaded, 0);
         const total = list.reduce((sum, item) => sum + item.total, 0);
-        setProgress({
-          text: `Downloading the AI model: ${megabytes(loaded)} of ${megabytes(total)} MB`,
-          percent: total ? (loaded / total) * 100 : 0,
-          etaMs: null,
-        });
+        setProgress({ text: "Getting ready...", percent: total ? (loaded / total) * 100 : 0, etaMs: null });
       });
       setDevice(used.device);
+      const tileSize = tileFor(used.device);
+
+      // Time the model on this device, then pick a photo size that finishes in about 35 seconds
+      setProgress({ text: "Checking your device...", percent: 0, etaMs: null });
+      const trial = scaledCopy(photo.full, plan.input.w, plan.input.h);
+      const trialData = trial.getContext("2d").getImageData(0, 0, plan.input.w, plan.input.h);
+      const msPerTile = await measureTileMs(enhancer, trialData, tileSize);
+      const fit = fitToBudget({ width: plan.input.w, height: plan.input.h, tileSize, msPerTile });
+      const input = { w: fit.w, h: fit.h };
+      const output = { w: fit.w * model.scale, h: fit.h * model.scale };
+
+      // The photo that goes to the model, the plain upscale to compare with, and the empty result
+      const source = scaledCopy(photo.full, input.w, input.h);
+      const sourceData = source.getContext("2d").getImageData(0, 0, input.w, input.h);
+      const before = scaledCopy(source, output.w, output.h);
+      const baseData = before.getContext("2d").getImageData(0, 0, output.w, output.h);
+      const after = document.createElement("canvas");
+      after.width = output.w;
+      after.height = output.h;
+      const afterContext = after.getContext("2d", { willReadFrequently: true });
+      afterContext.putImageData(baseData, 0, 0);
+      // Pieces that are not finished yet show the plain upscale
+      const enhancedData = new ImageData(new Uint8ClampedArray(baseData.data), baseData.width, baseData.height);
+      dataRef.current = { base: baseData, enhanced: enhancedData, context: afterContext };
+
       setResult({ before, after });
       setPhase("working");
 
@@ -129,7 +137,8 @@ export default function EnhancePage() {
         source: sourceData,
         target: enhancedData,
         scale: model.scale,
-        runTile: (rgb) => enhancer.runTile(rgb),
+        tileSize,
+        runTile: (rgb, size) => enhancer.runTile(rgb, size),
         isStopped: () => enhancer.stopped,
         onTile: ({ done, total, dirty, etaMs }) => {
           afterContext.putImageData(enhancedData, 0, 0, dirty.x, dirty.y, dirty.w, dirty.h);
@@ -209,8 +218,7 @@ export default function EnhancePage() {
           <div className="mx-auto max-w-2xl">
             <UploadBox onSelect={handleSelect} />
             <p className="mt-4 text-sm text-muted">
-              Works best on small, blurry or old photos. The first time, an AI model of a few dozen megabytes is
-              downloaded. It is kept in your browser after that.
+              Works best on small, blurry or old photos.
             </p>
           </div>
         ) : (
@@ -374,7 +382,7 @@ export default function EnhancePage() {
                       {plan.shrunk
                         ? `It will first be shrunk to ${plan.input.w} × ${plan.input.h} so it can be processed in a reasonable time. `
                         : ""}
-                      The result will be {plan.output.w} × {plan.output.h} pixels.
+                      The result will be up to {plan.output.w} × {plan.output.h} pixels. On slower devices it is made a little smaller so it finishes in about 35 seconds.
                     </p>
 
                     {busy ? (

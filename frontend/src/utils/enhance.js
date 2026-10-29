@@ -10,9 +10,13 @@
 //
 // The worker file is "frontend/public/enhance-worker.js".
 
-export const TILE = 96; // the part of the photo each tile is responsible for
+export const TILE = 96; // the part of the photo each tile is responsible for, on the processor
+export const TILE_GPU = 176; // bigger pieces on the graphics chip: fewer round trips, so it is faster
 export const MARGIN = 8; // extra pixels around it, for context (a multiple of 8, which the model likes)
 export const TILE_INPUT = TILE + 2 * MARGIN;
+
+// The tile size to use for the device that loaded the model
+export const tileFor = (device) => (device === "webgpu" ? TILE_GPU : TILE);
 export const MAX_OUTPUT_SIDE = 3072; // the biggest enhanced photo we make, in pixels
 
 // Three models of different strength. All are Swin2SR super-resolution models (Apache-2.0)
@@ -30,7 +34,7 @@ export const MODELS = [
     label: "Clean",
     scale: 2,
     repo: "Xenova/swin2SR-classical-sr-x2-64",
-    about: "A sharper 2× upscale for photos that are only a little soft. About 55 MB to download the first time.",
+    about: "A sharper 2× upscale for photos that are only a little soft.",
   },
   {
     id: "real",
@@ -66,9 +70,40 @@ export function plannedSize(width, height, model, hasGpu) {
   return { input: { w, h }, output: { w: w * model.scale, h: h * model.scale }, shrunk: shrink < 1 };
 }
 
+// ---------- Keeping the wait short on every device ----------
+
+export const TIME_BUDGET_MS = 35000; // how long we aim for the AI work to take
+const MIN_SIDE = 256; // we never shrink the photo below this (longest side), however slow the device is
+
+export const tileCount = (width, height, tileSize) => Math.ceil(width / tileSize) * Math.ceil(height / tileSize);
+
+// Times the model on one tile. The first run is only a warm-up (the engine prepares itself), so the second is timed.
+export async function measureTileMs(enhancer, source, tileSize) {
+  const tile = { x: 0, y: 0, w: Math.min(tileSize, source.width), h: Math.min(tileSize, source.height) };
+  const size = tileSize + 2 * MARGIN;
+  await enhancer.runTile(cutTile(source, tile, tileSize), size);
+  const started = performance.now();
+  await enhancer.runTile(cutTile(source, tile, tileSize), size);
+  return Math.max(1, performance.now() - started);
+}
+
+// The photo size to send to the model so the work finishes in about the time budget.
+// Fast devices keep the full size. Slow devices get a smaller photo, so nobody waits for minutes.
+export function fitToBudget({ width, height, tileSize, msPerTile, budgetMs = TIME_BUDGET_MS }) {
+  let factor = 1;
+  for (;;) {
+    const w = Math.max(1, Math.round(width * factor));
+    const h = Math.max(1, Math.round(height * factor));
+    const fits = tileCount(w, h, tileSize) * msPerTile <= budgetMs;
+    if (fits || Math.max(w, h) <= MIN_SIDE) return { w, h, shrunk: factor < 1 };
+    factor *= 0.92;
+    if (Math.max(width, height) * factor < MIN_SIDE) factor = MIN_SIDE / Math.max(width, height);
+  }
+}
+
 // ---------- Tiles (plain functions, so they are easy to test) ----------
 
-export function planTiles(width, height) {
+export function planTiles(width, height, TILE = 96) {
   const tiles = [];
   for (let y = 0; y < height; y += TILE) {
     for (let x = 0; x < width; x += TILE) {
@@ -81,7 +116,8 @@ export function planTiles(width, height) {
 // Cuts one tile out of the photo as red-green-blue bytes.
 // Near the photo's edge, the missing pixels are copied from the nearest edge pixel.
 // "source" is { data (RGBA bytes), width, height }.
-export function cutTile(source, tile) {
+export function cutTile(source, tile, TILE = 96) {
+  const TILE_INPUT = TILE + 2 * MARGIN;
   const out = new Uint8Array(TILE_INPUT * TILE_INPUT * 3);
   let at = 0;
   for (let j = 0; j < TILE_INPUT; j++) {
@@ -99,7 +135,8 @@ export function cutTile(source, tile) {
 
 // Pastes the middle of an enhanced tile into the big result and says which area changed.
 // "target" is { data (RGBA bytes), width }. "result" is { data (RGB bytes), width, height }.
-export function placeTile(target, result, tile, scale) {
+export function placeTile(target, result, tile, scale, TILE = 96) {
+  const TILE_INPUT = TILE + 2 * MARGIN;
   const expected = TILE_INPUT * scale;
   if (result.width !== expected || result.height !== expected || result.data.length !== expected * expected * 3) {
     throw new EnhanceError("The AI model gave an answer in an unexpected size. Please try a different model.");
@@ -122,17 +159,18 @@ export function placeTile(target, result, tile, scale) {
 // Enhances a whole photo, one tile at a time.
 //   source    - { data, width, height } of the photo going in
 //   target    - { data, width, height } of the result (filled in as tiles finish)
-//   runTile   - async (rgbBytes) => { data, width, height }, which sends one tile to the model
+//   tileSize  - the size of each piece (bigger on the graphics chip)
+//   runTile   - async (rgbBytes, inputSize) => { data, width, height }, which sends one tile to the model
 //   onTile    - called after every tile with { done, total, dirty, etaMs }
 //   isStopped - returns true when the person pressed Cancel
-export async function enhanceImageData({ source, target, scale, runTile, onTile, isStopped }) {
-  const tiles = planTiles(source.width, source.height);
+export async function enhanceImageData({ source, target, scale, runTile, onTile, isStopped, tileSize = TILE }) {
+  const tiles = planTiles(source.width, source.height, tileSize);
   const started = Date.now();
 
   for (let n = 0; n < tiles.length; n++) {
     if (isStopped?.()) throw new EnhanceError("Cancelled", { cancelled: true });
-    const result = await runTile(cutTile(source, tiles[n]));
-    const dirty = placeTile(target, result, tiles[n], scale);
+    const result = await runTile(cutTile(source, tiles[n], tileSize), tileSize + 2 * MARGIN);
+    const dirty = placeTile(target, result, tiles[n], scale, tileSize);
     const done = n + 1;
     const etaMs = ((Date.now() - started) / done) * (tiles.length - done);
     onTile?.({ done, total: tiles.length, dirty, etaMs });
@@ -189,9 +227,9 @@ export class Enhancer {
   }
 
   // Sends one tile (red-green-blue bytes) and gets the enhanced tile back
-  async runTile(rgb) {
+  async runTile(rgb, size = TILE_INPUT) {
     const buffer = rgb.buffer;
-    const reply = await this.send({ type: "tile", size: TILE_INPUT, data: buffer }, [buffer]);
+    const reply = await this.send({ type: "tile", size, data: buffer }, [buffer]);
     return { data: new Uint8Array(reply.data), width: reply.width, height: reply.height };
   }
 
